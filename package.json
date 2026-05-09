@@ -1,7 +1,7 @@
 {
-  "name": "yon-mocko",
+  "name": "machka",
   "version": "0.1.0",
-  "homepage": "https://hisyeo.github.io/mocko",
+  "homepage": "https://kalob.github.io/machka",
   "private": true,
   "dependencies": {
     "@codemirror/commands": "^6.6.0",
