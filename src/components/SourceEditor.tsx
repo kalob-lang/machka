@@ -43,7 +43,7 @@ const SourceEditor: React.FC<SourceEditorProps> = ({
   translationSanitization
 }) => {
   const { source, decompressedContent } = useSource();
-  const { grammarCheck, setError, handleSetItem, updateStorageVersion } = useApp();
+  const { setError, handleSetItem, updateStorageVersion } = useApp();
 
   const [title, setTitle] = useState('');
   const [filename, setFilename] = useState('');
@@ -62,7 +62,6 @@ const SourceEditor: React.FC<SourceEditorProps> = ({
   const [translatedTitle, setTranslatedTitle] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [isExecutingSegmentation, setIsExecutingSegmentation] = useState(false);
-  const [defaultGrammarRule, setDefaultGrammarRule] = useState('');
   const [isCompressed, setIsCompressed] = useState(false);
   const [compressionLevel, setCompressionLevel] = useState<CompressionLevel>(1);
   const [originalCompression, setOriginalCompression] = useState(false);
@@ -125,7 +124,6 @@ const SourceEditor: React.FC<SourceEditorProps> = ({
       const rule = source.segmentationRule || '\n';
       setSegmentationRule(rule);
       setOriginalSegmentationRule(rule);
-      setDefaultGrammarRule(source.defaultGrammarRule || '');
       validateRegex(rule);
       setSourceSize(calculateSourceSize(source.id));
       
@@ -163,12 +161,7 @@ const SourceEditor: React.FC<SourceEditorProps> = ({
     }
   }, [source, translationsVersion, decompressedContent, setError, translationSanitization]);
 
-  const handleDefaultSegmentRuleChange : React.ChangeEventHandler<HTMLInputElement> = (event: React.ChangeEvent<HTMLInputElement>) => {
-    if (typeof event.target.value == 'string' && source?.id) {
-      setDefaultGrammarRule(event.target.value)
-      onSourceUpdate({ ...source, title, content, filename , defaultGrammarRule: event.target.value });
-    }
-  }
+
 
   const handleContentSave = () => {
     if (!source) return;
@@ -239,7 +232,6 @@ const SourceEditor: React.FC<SourceEditorProps> = ({
       title,
       filename,
       content: finalContent,
-      defaultGrammarRule,
       compression: isCompressed,
       compressionLevel: compressionLevel
     };
@@ -371,17 +363,17 @@ const SourceEditor: React.FC<SourceEditorProps> = ({
     saveFile(contentToExport, `${filename}_translated.${extension}`, mimeType);
   };
 
-  const handleSaveMockoAs = () => {
+  const handleSaveMachkaAs = () => {
     if (!source) return;
 
     // We read raw from localStorage to preserve compression
-    const mockoData = {
-      source: { ...source, filename, defaultGrammarRule, compression: isCompressed, compressionLevel },
+    const machkaData = {
+      source: { ...source, filename, compression: isCompressed, compressionLevel },
       translations: localStorage.getItem(`translations_${source.id}`) || '{}',
       memories: localStorage.getItem(`memories_${source.id}`) || '{}',
       delimiters: localStorage.getItem(`delimiters_${source.id}`) || '[]',
     };
-    saveFile(JSON.stringify(mockoData, null, 2), `${filename}.mocko`, 'application/json');
+    saveFile(JSON.stringify(machkaData, null, 2), `${filename}.machka`, 'application/json');
   };
 
   const handleCopy = () => {
@@ -471,7 +463,7 @@ const SourceEditor: React.FC<SourceEditorProps> = ({
             <Stack direction='horizontal' gap={3}>
               <Button variant="primary" onClick={handleContentSave} className="mt-2" disabled={!isContentChanged || !!filenameError || !!segmentationRuleError}>Save</Button>
               <Button variant="secondary" onClick={handleContentDiscard} className="mt-2 ml-2" disabled={!isContentChanged}>Discard Changes</Button>
-              <Button variant="success" onClick={handleSaveMockoAs} className="mt-2 ml-2">Save MOCKO file as...</Button>
+              <Button variant="success" onClick={handleSaveMachkaAs} className="mt-2 ml-2">Save MACHKA file as...</Button>
               <Button variant="info" onClick={handleDuplicate} className="mt-2 ml-2 ms-auto">Duplicate</Button>
               <Button variant="danger" onClick={handleDelete} className="mt-2 ml-2">Delete</Button>
             </Stack>
@@ -479,17 +471,7 @@ const SourceEditor: React.FC<SourceEditorProps> = ({
 
           <div className="mt-4">
             <h2>Segmentation</h2>
-            {grammarCheck && (
-              <Form.Group controlId="defaultGrammarRuleSelect" className="mt-3">
-                <Form.Label>Default Segment Grammar Rule</Form.Label>
-                <Form.Control as="select" value={defaultGrammarRule} onChange={handleDefaultSegmentRuleChange}>
-                  <option value="">-</option>
-                  <option value="Sentences">Sentences</option>
-                  <option value="Constituents">Constituents</option>
-                  <option value="Phrases">Phrases</option>
-                </Form.Control>
-              </Form.Group>
-            )}
+
             <Form.Group controlId="segmentationRule" className="mt-2">
               <Form.Label>Regular Expression</Form.Label>
               <Alert variant="warning">

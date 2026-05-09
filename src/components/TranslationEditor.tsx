@@ -54,7 +54,7 @@ function isSelectionInSelector(selection: Selection, selector: string): boolean 
 
 const TranslationEditor: React.FC<TranslationEditorProps> = ({ onSplit, onTranslationsUpdate, onMemoryUpdate, memoryVersion, scrollToSegment, onScrollToSegmentHandled, isDirty, setIsDirty }) => {
   const { source, segments, delimiters } = useSource();
-  const { grammarCheck, spellCheck, defaultGrammarRule, handleSetItem, setError, scrollingReturnButtonsEnabled, scrollingReturnButtonsSensitivity } = useApp();
+  const { spellCheck, handleSetItem, setError, scrollingReturnButtonsEnabled, scrollingReturnButtonsSensitivity } = useApp();
 
   const [translations, setTranslations] = useState<Record<string, any>>({});
   const [editingSegment, setEditingSegment] = useState<string | null>(null);
@@ -79,7 +79,7 @@ const TranslationEditor: React.FC<TranslationEditorProps> = ({ onSplit, onTransl
   const [notePopoverPlacement, setNotePopoverPlacement] = useState<Placement>('top');
   const [bookmarkPopoverPlacement, setBookmarkPopoverPlacement] = useState<Placement>('top');
 
-  const [segmentGrammarRule, setSegmentGrammarRule] = useState('');
+
   const [segmentType, setSegmentType] = useState<SegmentType>('Body');
   const [outlineLevel, setOutlineLevel] = useState<OutlineLevel>('Level 2');
   const [delimiterAction, setDelimiterAction] = useState<DelimiterAction>('Skip Succeeding');
@@ -172,7 +172,7 @@ const TranslationEditor: React.FC<TranslationEditorProps> = ({ onSplit, onTransl
         translation: currentTranslation,
         note: currentNote,
         bookmark: currentBookmark,
-        grammarRule: segmentGrammarRule,
+
         segmentType: segmentType,
         outlineLevel: outlineLevel,
         delimiterAction: delimiterAction,
@@ -181,7 +181,6 @@ const TranslationEditor: React.FC<TranslationEditorProps> = ({ onSplit, onTransl
         currentState.translation !== initialEditorState.translation ||
         currentState.note !== initialEditorState.note ||
         JSON.stringify(currentState.bookmark) !== JSON.stringify(initialEditorState.bookmark) ||
-        currentState.grammarRule !== initialEditorState.grammarRule ||
         currentState.segmentType !== initialEditorState.segmentType ||
         currentState.outlineLevel !== initialEditorState.outlineLevel ||
         currentState.delimiterAction !== initialEditorState.delimiterAction;
@@ -190,7 +189,7 @@ const TranslationEditor: React.FC<TranslationEditorProps> = ({ onSplit, onTransl
     } else {
       setIsDirty(false);
     }
-  }, [currentTranslation, currentNote, currentBookmark, segmentGrammarRule, segmentType, outlineLevel, delimiterAction, editingSegment, initialEditorState, setIsDirty]);
+  }, [currentTranslation, currentNote, currentBookmark, segmentType, outlineLevel, delimiterAction, editingSegment, initialEditorState, setIsDirty]);
 
   useEffect(() => {
     if (isIntersecting) {
@@ -328,7 +327,6 @@ const TranslationEditor: React.FC<TranslationEditorProps> = ({ onSplit, onTransl
       const translation = translationData.text || '';
       const note = translationData.note || '';
       const bookmark = translationData.bookmark || null;
-      const grammarRule = translationData.grammarRule || '';
       const segType = translationData.segmentType || 'Body';
       const outLevel = translationData.outlineLevel || 'Level 2';
       const delAction = translationData.delimiterAction || 'Skip Succeeding';
@@ -337,23 +335,21 @@ const TranslationEditor: React.FC<TranslationEditorProps> = ({ onSplit, onTransl
       setCurrentNote(note);
       setCurrentBookmark(bookmark);
       setInitialBookmark(bookmark);
-      setSegmentGrammarRule(grammarRule);
       setSegmentType(segType);
       setOutlineLevel(outLevel);
       setDelimiterAction(delAction);
 
-      initialState = { translation, note, bookmark, grammarRule, segmentType: segType, outlineLevel: outLevel, delimiterAction: delAction };
+      initialState = { translation, note, bookmark, segmentType: segType, outlineLevel: outLevel, delimiterAction: delAction };
     } else {
       const translation = translationData || '';
       setCurrentTranslation(translation);
       setCurrentNote('');
       setCurrentBookmark(null);
       setInitialBookmark(null);
-      setSegmentGrammarRule('');
       setSegmentType('Body');
       setOutlineLevel('Level 2');
       setDelimiterAction('Skip Succeeding');
-      initialState = { translation, note: '', bookmark: null, grammarRule: '', segmentType: 'Body', outlineLevel: 'Level 2', delimiterAction: 'Skip Succeeding' };
+      initialState = { translation, note: '', bookmark: null, segmentType: 'Body', outlineLevel: 'Level 2', delimiterAction: 'Skip Succeeding' };
     }
     setInitialEditorState(initialState);
     setDiagnostics([]);
@@ -384,7 +380,7 @@ const TranslationEditor: React.FC<TranslationEditorProps> = ({ onSplit, onTransl
         text: currentTranslation, 
         note: currentNote, 
         bookmark: currentBookmark,
-        grammarRule: segmentGrammarRule,
+
         segmentType: segmentType,
         outlineLevel: outlineLevel,
         delimiterAction: segmentType === 'Skip' ? delimiterAction : undefined
@@ -411,7 +407,7 @@ const TranslationEditor: React.FC<TranslationEditorProps> = ({ onSplit, onTransl
         text: currentTranslation, 
         note: currentNote, 
         bookmark: currentBookmark,
-        grammarRule: segmentGrammarRule,
+
         segmentType: segmentType,
         outlineLevel: outlineLevel,
         delimiterAction: segmentType === 'Skip' ? delimiterAction : undefined
@@ -561,7 +557,6 @@ const TranslationEditor: React.FC<TranslationEditorProps> = ({ onSplit, onTransl
           text: currentTranslation, 
           note: currentNote, 
           bookmark: currentBookmark,
-          grammarRule: segmentGrammarRule,
           segmentType: segmentType,
           outlineLevel: outlineLevel,
           delimiterAction: segmentType === 'Skip' ? delimiterAction : undefined
@@ -588,7 +583,6 @@ const TranslationEditor: React.FC<TranslationEditorProps> = ({ onSplit, onTransl
           text: currentTranslation, 
           note: currentNote, 
           bookmark: null,
-          grammarRule: segmentGrammarRule,
           segmentType: segmentType,
           outlineLevel: outlineLevel,
           delimiterAction: segmentType === 'Skip' ? delimiterAction : undefined
@@ -635,9 +629,8 @@ const TranslationEditor: React.FC<TranslationEditorProps> = ({ onSplit, onTransl
     </div>;
   }
 
-  const grammarErrors = diagnostics.filter(d => d.severity === 'info');
   const spellingErrors = diagnostics.filter(d => d.severity === 'warning');
-  const hasErrors = (grammarCheck && grammarErrors.length > 0) || (spellCheck && spellingErrors.length > 0);
+  const hasErrors = spellCheck && spellingErrors.length > 0;
 
   const isBookmarkUnchanged = initialBookmark !== null && JSON.stringify(currentBookmark) === JSON.stringify(initialBookmark);
 
@@ -650,15 +643,7 @@ const TranslationEditor: React.FC<TranslationEditorProps> = ({ onSplit, onTransl
             ✂️ Split Source Before This Segment
           </Button>
         </div>
-        <Form.Group className="mb-3">
-            <Form.Label>Segment Grammar Rule</Form.Label>
-            <Form.Select value={segmentGrammarRule} onChange={(e) => setSegmentGrammarRule(e.target.value)} size="sm">
-                <option value="">Default</option>
-                <option value="Sentences">Sentences</option>
-                <option value="Constituents">Constituents</option>
-                <option value="Phrases">Phrases</option>
-            </Form.Select>
-        </Form.Group>
+
         <Form.Group className="mb-3">
             <Form.Label>Segment Type</Form.Label>
             <Form.Select value={segmentType} onChange={(e) => handleSegmentTypeChange(e.target.value as SegmentType)} size="sm">
@@ -857,7 +842,6 @@ const TranslationEditor: React.FC<TranslationEditorProps> = ({ onSplit, onTransl
                         onDiagnosticsChange={setDiagnostics}
                         autofocus={editingSegment === segment}
                         numberedMemories={numberedMemories}
-                        grammarRule={segmentGrammarRule || source.defaultGrammarRule || defaultGrammarRule}
                         isDirty={isDirty}
                         />
                       <Stack direction='horizontal' gap={1}>

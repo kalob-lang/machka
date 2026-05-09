@@ -5,11 +5,9 @@ import { CompressionLevel, useApp, SourceSelectionLocation } from '../AppContext
 const Settings: React.FC = () => {
   const { 
     theme, setTheme, 
-    grammarCheck, setGrammarCheck, 
     spellCheck, setSpellCheck, 
     autocomplete, setAutocomplete, 
     wiktionarySearch, setWiktionarySearch, 
-    defaultGrammarRule, setDefaultGrammarRule,
     storageVersion, updateStorageVersion,
     defaultCompression, setDefaultCompression,
     defaultCompressionLevel, setDefaultCompressionLevel,
@@ -46,7 +44,7 @@ const Settings: React.FC = () => {
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = 'yon-mocko-backup.json';
+    a.download = 'uywng-machka-backup.json';
     a.click();
     URL.revokeObjectURL(url);
   };
@@ -186,25 +184,7 @@ const Settings: React.FC = () => {
           <Form.Text>
             This setting will cause any exclamation points to be rendered as regular periods in the translation output. Turning this off will cause exclamation points to remain as-is in the translation output. At a later time, additional sanitization practices may be added.
           </Form.Text>
-          <hr />
-          <Form.Check 
-            type="switch"
-            id="grammar-check-switch"
-            label="Grammar Checking"
-            checked={grammarCheck}
-            onChange={(e) => setGrammarCheck(e.target.checked)}
-          />
-          {grammarCheck && (
-            <Form.Group controlId="defaultGrammarRuleSelect" className="mt-3">
-              <Form.Label>Default Grammar Rule</Form.Label>
-              <Form.Control as="select" value={defaultGrammarRule} onChange={(e) => setDefaultGrammarRule(e.target.value)}>
-                <option value="Sentences">Sentences</option>
-                <option value="Constituents">Constituents</option>
-                <option value="Phrases">Phrases</option>
-              </Form.Control>
-            </Form.Group>
-          )}
-          <hr />
+
           <Form.Check
             type="switch"
             id="default-compression-switch"

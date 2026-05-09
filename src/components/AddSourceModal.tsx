@@ -49,7 +49,7 @@ const AddSourceModal: React.FC<AddSourceModalProps> = ({ show, onHide, onAddSour
           onImport(data);
           onHide();
         } catch (error) {
-          alert('Error parsing MOCKO file.');
+          alert('Error parsing MACHKA file.');
         }
       };
       reader.readAsText(file);
@@ -102,8 +102,8 @@ const AddSourceModal: React.FC<AddSourceModalProps> = ({ show, onHide, onAddSour
       </Modal.Body>
       <Modal.Footer>
         <Stack direction='horizontal' gap={3}>
-          <label htmlFor="import-mocko" className="btn btn-info">Import MOCKO file</label>
-          <input id="import-mocko" type="file" accept=".mocko" onChange={handleFileChange}  style={{ display: 'none' }} />
+          <label htmlFor="import-machka" className="btn btn-info">Import MACHKA file</label>
+          <input id="import-machka" type="file" accept=".machka" onChange={handleFileChange}  style={{ display: 'none' }} />
           <div className='vr'/>
           <Button variant="danger" onClick={handleMagicWand} disabled={isWandDisabled} title='Random story time!'>🪄</Button>
           <Button variant="secondary" onClick={handleCancel}>Cancel</Button>

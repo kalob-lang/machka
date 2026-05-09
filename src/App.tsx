@@ -96,7 +96,7 @@ const App: React.FC = () => {
   useEffect(() => {
     const themeLink = document.getElementById('theme-link') as HTMLLinkElement;
     if (themeLink) {
-      themeLink.href = `/mocko/bootstrap/${theme}/bootstrap.min.css`;
+      themeLink.href = `/machka/bootstrap/${theme}/bootstrap.min.css`;
     }
     const htmlElement = document.documentElement
     htmlElement.setAttribute('data-theme', theme)
@@ -119,7 +119,7 @@ const App: React.FC = () => {
   }, []);
 
   useEffect(() => {
-    const baseTitle = "yôn Mocko";
+    const baseTitle = "uywng Machka";
     if (selectedSource && selectedSource.filename) {
       document.title = `${selectedSource.filename} - ${baseTitle}`;
     } else {
@@ -353,7 +353,7 @@ const App: React.FC = () => {
     }
   };
 
-  const handleImportMocko = (data: any) => {
+  const handleImportMachka = (data: any) => {
     confirmAndProceed(() => {
       const existingSource = sources.find(s => s.filename === data.source.filename);
       if (existingSource) {
@@ -697,7 +697,7 @@ const App: React.FC = () => {
                       <Nav.Link eventKey='settings'>Settings</Nav.Link>
                     </Nav.Item>
                     <Nav.Item>
-                      <Nav.Link target='_blank' href='https://github.com/Hisyeo/mocko/issues/new'>Report Issue 🚨</Nav.Link>
+                      <Nav.Link target='_blank' href='https://github.com/kalob/machka/issues/new'>Report Issue 🚨</Nav.Link>
                     </Nav.Item>
                   </Nav>
                 </Row>
@@ -743,8 +743,8 @@ const App: React.FC = () => {
           </div>
           <footer className='mt-auto'>
               <div className='text-center p-4' style={{ backgroundColor: 'rgba(0, 0, 0, 0.05)' }}>
-                © 2025 Copyright: <a className='text-reset fw-bold' href='https://hisyeo.github.io/'>
-                  Hîsyêô Institute
+                © 2025 Copyright: <a className='text-reset fw-bold' href='https://kalob.github.io/'>
+                  Kalob Institute
                 </a>
               </div>
           </footer>
@@ -753,7 +753,7 @@ const App: React.FC = () => {
           show={showAddSourceModal} 
           onHide={() => setShowAddSourceModal(false)} 
           onAddSource={handleAddSource} 
-          onImport={handleImportMocko}
+          onImport={handleImportMachka}
         />
         {conflictData && (
           <ImportConflictModal 

@@ -6,16 +6,12 @@ export type SourceSelectionLocation = 'translation-first' | 'translation-incompl
 interface AppContextType {
   theme: string;
   setTheme: (theme: string) => void;
-  grammarCheck: boolean;
-  setGrammarCheck: (value: boolean) => void;
   spellCheck: boolean;
   setSpellCheck: (value: boolean) => void;
   autocomplete: boolean;
   setAutocomplete: (value: boolean) => void;
   wiktionarySearch: string;
   setWiktionarySearch: (value: string) => void;
-  defaultGrammarRule: string;
-  setDefaultGrammarRule: (value: string) => void;
   error: { title: string; message: React.ReactNode } | null;
   setError: (error: { title: string; message: React.ReactNode } | null) => void;
   handleSetItem: (key: string, value: string) => boolean;
@@ -41,11 +37,9 @@ const AppContext = createContext<AppContextType | undefined>(undefined);
 
 export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [theme, rawSetTheme] = useState(() => localStorage.getItem('yon-mocko-theme') || 'brite');
-  const [grammarCheck, rawSetGrammarCheck] = useState(() => localStorage.getItem('grammarCheck') !== 'true');
   const [spellCheck, rawSetSpellCheck] = useState(() => localStorage.getItem('spellCheck') !== 'true');
   const [autocomplete, rawSetAutocomplete] = useState(() => localStorage.getItem('autocomplete') !== 'true');
   const [wiktionarySearch, rawSetWiktionarySearch] = useState(() => localStorage.getItem('wiktionarySearch') || 'modal');
-  const [defaultGrammarRule, rawSetDefaultGrammarRule] = useState(() => localStorage.getItem('defaultGrammarRule') || 'Constituents');
   const [error, setError] = useState<{ title: string; message: React.ReactNode } | null>(null);
   const [storageVersion, setStorageVersion] = useState(0);
   const [defaultCompression, rawSetDefaultCompression] = useState(() => localStorage.getItem('defaultCompression') === 'true');
@@ -81,11 +75,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }
   }, [handleSetItem]);
 
-  const setGrammarCheck = useCallback((value: boolean) => {
-    if (handleSetItem('grammarCheck', String(value))) {
-      rawSetGrammarCheck(value);
-    }
-  }, [handleSetItem]);
+
 
   const setSpellCheck = useCallback((value: boolean) => {
     if (handleSetItem('spellCheck', String(value))) {
@@ -105,11 +95,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }
   }, [handleSetItem]);
 
-  const setDefaultGrammarRule = useCallback((value: string) => {
-    if (handleSetItem('defaultGrammarRule', value)) {
-      rawSetDefaultGrammarRule(value);
-    }
-  }, [handleSetItem]);
+
 
   const setDefaultCompression = useCallback((value: boolean) => {
     if (handleSetItem('defaultCompression', String(value))) {
@@ -160,11 +146,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   return (
     <AppContext.Provider value={useMemo(() => ({
       theme, setTheme,
-      grammarCheck, setGrammarCheck,
       spellCheck, setSpellCheck,
       autocomplete, setAutocomplete,
       wiktionarySearch, setWiktionarySearch,
-      defaultGrammarRule, setDefaultGrammarRule,
       error, setError,
       handleSetItem,
       storageVersion,
@@ -183,7 +167,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       setScrollingReturnButtonsEnabled,
       scrollingReturnButtonsSensitivity,
       setScrollingReturnButtonsSensitivity
-    }), [ theme, setTheme, grammarCheck, setGrammarCheck, spellCheck, setSpellCheck, autocomplete, setAutocomplete, wiktionarySearch, setWiktionarySearch, defaultGrammarRule, setDefaultGrammarRule, error, handleSetItem, storageVersion, updateStorageVersion, defaultCompression, setDefaultCompression, defaultCompressionLevel, setDefaultCompressionLevel, sourceSelectionLocation, handleSetSourceSelectionLocation, showModeHelp, setShowModeHelp, translationSanitization, setTranslationSanitization, scrollingReturnButtonsEnabled, setScrollingReturnButtonsEnabled, scrollingReturnButtonsSensitivity, setScrollingReturnButtonsSensitivity ])}>
+    }), [ theme, setTheme, spellCheck, setSpellCheck, autocomplete, setAutocomplete, wiktionarySearch, setWiktionarySearch, error, handleSetItem, storageVersion, updateStorageVersion, defaultCompression, setDefaultCompression, defaultCompressionLevel, setDefaultCompressionLevel, sourceSelectionLocation, handleSetSourceSelectionLocation, showModeHelp, setShowModeHelp, translationSanitization, setTranslationSanitization, scrollingReturnButtonsEnabled, setScrollingReturnButtonsEnabled, scrollingReturnButtonsSensitivity, setScrollingReturnButtonsSensitivity ])}>
       {children}
     </AppContext.Provider>
   );

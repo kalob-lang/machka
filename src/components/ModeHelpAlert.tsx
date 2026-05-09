@@ -25,7 +25,7 @@ const helpTexts: Record<ModeHelpAlertProps['mode'], React.ReactNode> = {
       <li>Use the <b>Preview</b> button to see how a new segmentation rule will affect the document before applying it.</li>
       <li>Enable <b>Compression</b> to save storage space, which is useful for very large sources.</li>
       <li>Once translated, you can <b>Export</b> your work to TXT, MD, or HTML formats.</li>
-      <li>Use <b>Save MOCKO file as...</b> to back up the entire project (source, translations, and memories) to a single file.</li>
+      <li>Use <b>Save MACHKA file as...</b> to back up the entire project (source, translations, and memories) to a single file.</li>
     </ul>
   ),
   memory: (

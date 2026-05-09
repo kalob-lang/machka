@@ -1,28 +1,18 @@
 import React, { useEffect, useRef } from 'react';
 import { EditorState } from '@codemirror/state';
 import { EditorView } from '@codemirror/view';
-import { linter, lintGutter, Diagnostic, forEachDiagnostic } from '@codemirror/lint';
-import NSpell from 'nspell';
-import HisyeoLexer from '../vendor/grammar/HisyeoLexer.js';
-import HisyeoParser from '../vendor/grammar/HisyeoParser.js';
-import { HisyeoErrorListener } from '../grammar/HisyeoErrorListener.js';
-import { InputStream, CommonTokenStream } from 'antlr4';
+import { linter, Diagnostic, forEachDiagnostic } from '@codemirror/lint';
 import { minimalSetup } from 'codemirror';
 import { autocompletion, CompletionContext } from '@codemirror/autocomplete';
 import Fuse from 'fuse.js';
-import hisyeoHunspellFiles from '../vendor/hunspell/hisyeo.json';
 import { useApp } from '../AppContext';
-const { aff: hisyeoAff, dic: hisyeoDic } = hisyeoHunspellFiles
+import { lexiconData, commonSuffixes } from '../vendor/kalobLexicon';
 
-interface HisyeoFuseResult {
-  type: string,
-  latin: string,
-  syllabary: string,
-  abugida: string,
-  meaning: string,
-  verb: string,
-  noun: string,
-  modifier: string,
+interface KalobLexiconResult {
+  word: string,
+  eng: string,
+  cat: string,
+  pos: string
 }
 
 interface SpellCheckEditorProps {
@@ -31,15 +21,29 @@ interface SpellCheckEditorProps {
   onDiagnosticsChange: (diagnostics: readonly Diagnostic[]) => void;
   autofocus?: boolean;
   numberedMemories: Record<number, { source: string, target: string }>;
-  grammarRule: string;
   isDirty?: boolean;
 }
 
-const SpellCheckEditor: React.FC<SpellCheckEditorProps> = ({ value, onChange, onDiagnosticsChange, autofocus, numberedMemories, grammarRule, isDirty }) => {
+const nounRootsArray = lexiconData.filter(w => w.cat === 'Noun/Number').map(w => w.word.toLowerCase()).sort((a,b) => b.length - a.length);
+const allRoots = new Set(lexiconData.map(w => w.word.toLowerCase()));
+const suffixesArray = commonSuffixes.map(s => s.suffix.toLowerCase()).sort((a,b) => b.length - a.length);
+
+const nounPattern = `(?:${nounRootsArray.join('|')})`;
+const suffixPattern = `(?:${suffixesArray.join('|')})`;
+const compoundRegex = new RegExp(`^${nounPattern}(?:u${nounPattern})?(?:${suffixPattern}){0,3}$`);
+
+function checkSpelling(word: string): boolean {
+    const lowerWord = word.toLowerCase();
+    if (allRoots.has(lowerWord)) return true;
+    if (compoundRegex.test(lowerWord)) return true;
+    return false;
+}
+
+const SpellCheckEditor: React.FC<SpellCheckEditorProps> = ({ value, onChange, onDiagnosticsChange, autofocus, numberedMemories, isDirty }) => {
   const editorRef = useRef<HTMLDivElement>(null);
   const viewRef = useRef<EditorView | null>(null);
   const numberedMemoriesRef = useRef(numberedMemories);
-  const { grammarCheck, spellCheck, autocomplete } = useApp();
+  const { spellCheck, autocomplete } = useApp();
 
   useEffect(() => {
     numberedMemoriesRef.current = numberedMemories;
@@ -48,7 +52,9 @@ const SpellCheckEditor: React.FC<SpellCheckEditorProps> = ({ value, onChange, on
   useEffect(() => {
     let isCancelled = false;
 
-    const customAutocomplete = (context: CompletionContext, fuse: Fuse<HisyeoFuseResult>) => {
+    const fuse = new Fuse(lexiconData, { keys: ['word', 'eng'], includeScore: true, threshold: 0.1 });
+
+    const customAutocomplete = (context: CompletionContext, fuse: Fuse<KalobLexiconResult>) => {
         const memoryTag = context.matchBefore(/!\d*/);
         if (memoryTag) {
           if (memoryTag.text === '!') {
@@ -78,7 +84,7 @@ const SpellCheckEditor: React.FC<SpellCheckEditorProps> = ({ value, onChange, on
           }
         }
 
-        const word = context.matchBefore(/[A-ZÔÊÎÛa-zôêîûꞌ']*/);
+        const word = context.matchBefore(/[A-Za-z']*/);
         if (!word || (word.from === word.to && !context.explicit)) {
           return null;
         }
@@ -89,126 +95,65 @@ const SpellCheckEditor: React.FC<SpellCheckEditorProps> = ({ value, onChange, on
           options: results.map(r => {
             const infoElem = document.createElement('div')
             infoElem.innerHTML = 
-              `<strong>Type:</strong> ${r.item.type}
-               <strong>Verb:</strong> ${r.item.verb}
-               <strong>Noun:</strong> ${r.item.noun}
-               <strong>Adjective:</strong> ${r.item.modifier}`
-            return { label: r.item.latin, type: r.item.type, detail: r.item.meaning, info: () => infoElem}
+              `<strong>Type:</strong> ${r.item.cat}
+               <strong>POS:</strong> ${r.item.pos}`
+            return { label: r.item.word, type: r.item.cat, detail: r.item.eng, info: () => infoElem}
           }),
         };
     };
 
-    fetch('https://hisyeo.github.io/words.json')
-      .then(response => response.json())
-      .then(data => {
-        if (isCancelled) return;
-
-        const fuse = new Fuse(Object.values(data), { keys: ['latin'], includeScore: true, threshold: 0.1 });
-
-        const spellLinter = linter(async (view) => {
-          if (!spellCheck) return [];
-          const diagnostics: Diagnostic[] = [];
-          try {
-            const spell = new NSpell(hisyeoAff, hisyeoDic);
-    
-            const text = view.state.doc.toString();
-            const lookbehind = '(?<=^|[\\s\\-"\'“«<¿])'
-            const lookahead = '(?=[\\s\\.,;:\\-"\'”»>?]|$)'
-            const words = text.match(new RegExp(`${lookbehind}\\p{Letter}+${lookahead}`, 'gv')) || [];
-            for (const w of words) if (!/^[A-Z]/.test(w) && !spell.correct(w)) for (const m of text.matchAll(new RegExp(`${lookbehind}${w}${lookahead}`, 'gv')))
-              diagnostics.push({
-                from: m.index!,
-                to: m.index! + w.length,
-                severity: 'error',
-                message: `Suggestions: ${spell.suggest(w).join(', ')}`,
-            });
-          } catch (e) { console.error(e) }
-          return diagnostics;
+    const spellLinter = linter((view) => {
+      if (!spellCheck) return [];
+      const diagnostics: Diagnostic[] = [];
+      try {
+        const text = view.state.doc.toString();
+        const lookbehind = '(?<=^|[\\s\\-"\'“«<¿])'
+        const lookahead = '(?=[\\s\\.,;:\\-"\'”»>?]|$)'
+        const words = text.match(new RegExp(`${lookbehind}\\p{Letter}+${lookahead}`, 'gv')) || [];
+        for (const w of words) if (!/^[A-Z]/.test(w) && !checkSpelling(w)) for (const m of text.matchAll(new RegExp(`${lookbehind}${w}${lookahead}`, 'gv')))
+          diagnostics.push({
+            from: m.index!,
+            to: m.index! + w.length,
+            severity: 'warning',
+            message: `Unrecognized Kalob word or invalid compound`,
         });
-    
-        const grammarLinter = linter(view => {
-            if (!grammarCheck) return [];
-            const diagnostics: Diagnostic[] = [];
-            const text = view.state.doc.toString();
-            let chars: InputStream;
-            if (grammarRule == 'Sentences' && text.length && /[A-Za-zÔôÊêÎîÛû ]/.test(text.at(-1) as string)) {
-              // Adding a period so that sentences is a little less strict.
-              chars = new InputStream(`${text}.`)
-            } else {
-              chars = new InputStream(text);
-            }
-            const lexer = new HisyeoLexer(chars);
-            const lexerListener = new HisyeoErrorListener();
-            lexer.removeErrorListeners();
-            lexer.addErrorListener(lexerListener);
-            const tokens = new CommonTokenStream(lexer);
-            const parser = new HisyeoParser(tokens);
-            const parserListener = new HisyeoErrorListener();
-            parser.removeErrorListeners();
-            parser.addErrorListener(parserListener);
-            switch (grammarRule) {
-              case 'Sentences':
-                parser.sentencesStrict();
-                break;
-              case 'Constituents':
-                parser.sentenceStrict();
-                break;
-              case 'Phrases':
-                parser.nounPhraseStrict();
-                break;
-              default:
-                break;
-            }
-    
-            [...lexerListener.errors, ...parserListener.errors].forEach(err => {
-                const firstSpacePostCol = text.indexOf(' ', err.column)
-                diagnostics.push({
-                    from: err.offendingSymbol?.start || Math.min(err.column, text.length) || 0,
-                    to: err.offendingSymbol?.stop || firstSpacePostCol == -1 ? text.length : Math.min(firstSpacePostCol, text.length),
-                    severity: 'info',
-                    message: JSON.parse(`"${err.msg}"`),
-                });
-            });
-    
-            return diagnostics;
-        });
-    
-        const extensions = [
-          minimalSetup,
-          spellLinter,
-          grammarLinter,
-          EditorView.lineWrapping,
-          EditorView.updateListener.of((update) => {
-            if (update.docChanged) {
-              onChange(update.state.doc.toString());
-            }
-            const diagnostics: Diagnostic[] = []
-            forEachDiagnostic(update.state, d => diagnostics.push(d))
-            onDiagnosticsChange(diagnostics);
-          }),
-        ];
+      } catch (e) { console.error(e) }
+      return diagnostics;
+    });
 
-        if (autocomplete) {
-          extensions.push(autocompletion({ override: [(ctx) => customAutocomplete(ctx, fuse as Fuse<HisyeoFuseResult>)] }));
+    const extensions = [
+      minimalSetup,
+      spellLinter,
+      EditorView.lineWrapping,
+      EditorView.updateListener.of((update) => {
+        if (update.docChanged) {
+          onChange(update.state.doc.toString());
         }
+        const diagnostics: Diagnostic[] = []
+        forEachDiagnostic(update.state, d => diagnostics.push(d))
+        onDiagnosticsChange(diagnostics);
+      }),
+    ];
 
-        const state = EditorState.create({
-          doc: value,
-          extensions,
-        });
-    
-        const view = new EditorView({
-          state,
-          parent: editorRef.current!,
-        });
-    
-        viewRef.current = view;
-    
-        if (autofocus) {
-          view.focus();
-        }
-      })
-      .catch(error => console.error('Error fetching autocomplete words:', error));
+    if (autocomplete) {
+      extensions.push(autocompletion({ override: [(ctx) => customAutocomplete(ctx, fuse as unknown as Fuse<KalobLexiconResult>)] }));
+    }
+
+    const state = EditorState.create({
+      doc: value,
+      extensions,
+    });
+
+    const view = new EditorView({
+      state,
+      parent: editorRef.current!,
+    });
+
+    viewRef.current = view;
+
+    if (autofocus) {
+      view.focus();
+    }
 
     return () => {
       isCancelled = true;
@@ -217,7 +162,7 @@ const SpellCheckEditor: React.FC<SpellCheckEditorProps> = ({ value, onChange, on
         viewRef.current = null;
       }
     };
-  }, [autofocus, onChange, onDiagnosticsChange, grammarCheck, spellCheck, autocomplete, grammarRule]);
+  }, [autofocus, onChange, onDiagnosticsChange, spellCheck, autocomplete]);
 
   useEffect(() => {
     if (viewRef.current && value !== viewRef.current.state.doc.toString()) {
