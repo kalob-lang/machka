@@ -30,7 +30,7 @@ const suffixesArray = commonSuffixes.map(s => s.suffix.toLowerCase()).sort((a,b)
 
 const nounPattern = `(?:${nounRootsArray.join('|')})`;
 const suffixPattern = `(?:${suffixesArray.join('|')})`;
-const compoundRegex = new RegExp(`^${nounPattern}(?:u${nounPattern})?(?:${suffixPattern}){0,3}$`);
+const compoundRegex = new RegExp(`^u?${nounPattern}(?:u${nounPattern})?(?:${suffixPattern}){0,3}u?[ieoavw]?$`);
 
 function checkSpelling(word: string): boolean {
     const lowerWord = word.toLowerCase();
