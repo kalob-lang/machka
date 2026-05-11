@@ -30,7 +30,7 @@ const suffixesArray = commonSuffixes.map(s => s.suffix.toLowerCase()).sort((a,b)
 
 const nounPattern = `(?:${nounRootsArray.join('|')})`;
 const suffixPattern = `(?:${suffixesArray.join('|')})`;
-const compoundRegex = new RegExp(`^u?${nounPattern}(?:u${nounPattern})?(?:${suffixPattern}){0,3}u?[ieoavw]?$`);
+const compoundRegex = new RegExp(`^[aeiouvw]?${nounPattern}(?:u${nounPattern})?(?:${suffixPattern}){0,3}u?[eioavw]?(?:zh|j)?$`);
 
 function checkSpelling(word: string): boolean {
     const lowerWord = word.toLowerCase();
@@ -52,7 +52,42 @@ const SpellCheckEditor: React.FC<SpellCheckEditorProps> = ({ value, onChange, on
   useEffect(() => {
     let isCancelled = false;
 
-    const fuse = new Fuse(lexiconData, { keys: ['word', 'eng'], includeScore: true, threshold: 0.1 });
+    const unifiedLexicon = [
+      ...lexiconData,
+      ...commonSuffixes.map(s => ({
+        word: s.suffix,
+        eng: s.desc,
+        cat: 'Suffix',
+        pos: s.name
+      })),
+      ...[
+        { suffix: 'i', name: 'Eternal present', desc: 'Creates a verb in the eternal present tense.' },
+        { suffix: 'o', name: 'Transitory present', desc: 'Creates a verb in the transitory present tense.' },
+        { suffix: 'v', name: 'Habitual present', desc: 'Creates a verb in the habitual present tense.' },
+        { suffix: 'e', name: 'Past', desc: 'Creates a verb in the past tense.' },
+        { suffix: 'w', name: 'Conditional', desc: 'Creates a verb in the conditional tense.' },
+        { suffix: 'a', name: 'Future', desc: 'Creates a verb in the future tense.' },
+        { suffix: 'ij', name: 'Present Participle (Eternal)', desc: 'Creates a participle with the idea of eternal or general action.' },
+        { suffix: 'vj', name: 'Present Participle (Habitual)', desc: 'Creates a participle with the idea of habitual action.' },
+        { suffix: 'oj', name: 'Present Participle (Transitory)', desc: 'Creates a participle with the idea of transitory action.' },
+        { suffix: 'ej', name: 'Qualifying Adjective (General)', desc: 'Creates a qualifying adjective with the idea of general or eternal quality.' },
+        { suffix: 'aj', name: 'Qualifying Adjective (Duty)', desc: 'Creates a qualifying adjective with the idea of duty or obligation.' },
+        { suffix: 'wj', name: 'Qualifying Adjective (Possibility)', desc: 'Creates a qualifying adjective with the idea of possibility or potential' },
+        { suffix: 'izh', name: 'Gerundive Participle (Eternal)', desc: 'Creates a gerundive with the idea of eternal or general action' },
+        { suffix: 'vzh', name: 'Gerundive Participle (Habitual)', desc: 'Creates a gerundive with the idea of habitual action' },
+        { suffix: 'ozh', name: 'Gerundive Participle (Transitory)', desc: 'Creates a gerundive with the idea of transitory action' },
+        { suffix: 'ezh', name: 'Qualifying Adverb (General)', desc: 'Creates a qualifying adverb with the idea of general or eternal quality' },
+        { suffix: 'azh', name: 'Qualifying Adverb (Duty)', desc: 'Creates a qualifying adverb with the idea of duty or obligation' },
+        { suffix: 'wzh', name: 'Qualifying Adverb (Possibility)', desc: 'Creates a qualifying adverb with the idea of possibility or potential' }
+      ].map(s => ({
+        word: s.suffix,
+        eng: s.desc,
+        cat: 'Primary Ending',
+        pos: s.name
+      }))
+    ];
+
+    const fuse = new Fuse(unifiedLexicon, { keys: ['word', 'eng'], includeScore: true, threshold: 0.1 });
 
     const customAutocomplete = (context: CompletionContext, fuse: Fuse<KalobLexiconResult>) => {
         const memoryTag = context.matchBefore(/!\d*/);
@@ -88,10 +123,69 @@ const SpellCheckEditor: React.FC<SpellCheckEditorProps> = ({ value, onChange, on
         if (!word || (word.from === word.to && !context.explicit)) {
           return null;
         }
-        const results = fuse.search(word.text);
+
+        let searchTerm = word.text;
+        let fromPos = word.from;
+        let categoryFilter: string[] | null = null;
+
+        let textToParse = word.text;
+        let parsedLength = 0;
+
+        if (textToParse.startsWith('u')) {
+            parsedLength += 1;
+        }
+
+        let root1 = '';
+        for (const root of nounRootsArray) {
+            if (textToParse.startsWith(root, parsedLength)) {
+                root1 = root;
+                break;
+            }
+        }
+
+        if (root1) {
+            parsedLength += root1.length;
+            if (parsedLength < textToParse.length) {
+                if (textToParse[parsedLength] === 'u') {
+                    parsedLength += 1;
+                    let root2 = '';
+                    for (const root of nounRootsArray) {
+                        if (textToParse.startsWith(root, parsedLength)) {
+                            root2 = root;
+                            break;
+                        }
+                    }
+                    if (root2) {
+                        let afterRoot2Length = parsedLength + root2.length;
+                        if (afterRoot2Length < textToParse.length) {
+                            categoryFilter = ['Suffix', 'Primary Ending'];
+                            searchTerm = textToParse.substring(afterRoot2Length);
+                            fromPos = word.from + afterRoot2Length;
+                        } else {
+                            categoryFilter = ['Noun/Number', 'Primary Ending'];
+                            searchTerm = textToParse.substring(parsedLength);
+                            fromPos = word.from + parsedLength;
+                        }
+                    } else {
+                        categoryFilter = ['Noun/Number', 'Primary Ending'];
+                        searchTerm = textToParse.substring(parsedLength);
+                        fromPos = word.from + parsedLength;
+                    }
+                } else {
+                    categoryFilter = ['Suffix', 'Primary Ending'];
+                    searchTerm = textToParse.substring(parsedLength);
+                    fromPos = word.from + parsedLength;
+                }
+            }
+        }
+
+        let results = fuse.search(searchTerm);
+        if (categoryFilter) {
+            results = results.filter(r => categoryFilter!.includes(r.item.cat));
+        }
 
         return {
-          from: word.from,
+          from: fromPos,
           options: results.map(r => {
             const infoElem = document.createElement('div')
             infoElem.innerHTML = 

@@ -666,6 +666,12 @@ export const lexiconData = [
     "pos": "Relative"
   },
   {
+    "word": "rea",
+    "eng": "where",
+    "cat": "Designative",
+    "pos": "Relative"
+  },
+  {
     "word": "eka",
     "eng": "of which?",
     "cat": "Designative",
@@ -716,6 +722,12 @@ export const lexiconData = [
   {
     "word": "re",
     "eng": "who, which, that (Plural)",
+    "cat": "Designative",
+    "pos": "Relative"
+  },
+  {
+    "word": "rae",
+    "eng": "where (Plural)",
     "cat": "Designative",
     "pos": "Relative"
   },
@@ -2871,7 +2883,13 @@ export const lexiconData = [
     "word": "mwz",
     "cat": "Noun/Number",
     "pos": "Noun",
-    "eng": "Mouse / rabbit / rodent"
+    "eng": "Mouse / rat / rodent / murine"
+  },
+  {
+    "word": "lyebh",
+    "cat": "Noun/Number",
+    "pos": "Noun",
+    "eng": "Rabbit / hare / leporid / lagomorph"
   },
   {
     "word": "cherb",
