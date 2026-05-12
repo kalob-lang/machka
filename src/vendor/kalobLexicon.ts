@@ -5622,6 +5622,12 @@ export const lexiconData = [
     "eng": "Bias / slant / off-center / asymmetric weight or leaning"
   },
   {
+    "word": "chold",
+    "cat": "Noun/Number",
+    "pos": "Noun",
+    "eng": "Tremor / jolt / sudden kinetic shock / convulsion / concussive shake"
+  },
+  {
     "word": "w!",
     "cat": "Interjection",
     "eng": "Yearning / Insufficient (If only!, Not Enough!, More!)"
