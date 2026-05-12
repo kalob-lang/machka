@@ -1311,7 +1311,19 @@ export const lexiconData = [
     "word": "to",
     "cat": "Connective",
     "pos": "Preposition",
-    "eng": "To (direction)"
+    "eng": "To (vague direction)"
+  },
+  {
+    "word": "spi",
+    "cat": "Connective",
+    "pos": "Preposition",
+    "eng": "To (precise direction)"
+  },
+  {
+    "word": "tri",
+    "cat": "Connective",
+    "pos": "Preposition",
+    "eng": "For (beneficiary)"
   },
   {
     "word": "thro",
