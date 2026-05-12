@@ -2892,7 +2892,7 @@ export const lexiconData = [
     "eng": "Ape / primate / monkey"
   },
   {
-    "word": "mwz",
+    "word": "mvz",
     "cat": "Noun/Number",
     "pos": "Noun",
     "eng": "Mouse / rat / rodent / murine"
