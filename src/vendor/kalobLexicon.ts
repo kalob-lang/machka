@@ -5550,6 +5550,12 @@ export const lexiconData = [
     "eng": "Keyboard / pitched percussion / tuned acoustic matrix / synthesizer"
   },
   {
+    "word": "pyez",
+    "cat": "Noun/Number",
+    "pos": "Noun",
+    "eng": "Play / drama / theatrical performance / acted narrative"
+  },
+  {
     "word": "lvm",
     "cat": "Noun/Number",
     "pos": "Noun",
@@ -5596,6 +5602,18 @@ export const lexiconData = [
     "cat": "Noun/Number",
     "pos": "Noun",
     "eng": "Momentum / trend / potential energy / systemic trajectory"
+  },
+  {
+    "word": "rwn",
+    "cat": "Noun/Number",
+    "pos": "Noun",
+    "eng": "To run / high-velocity terrestrial locomotion / rapid leg-gait"
+  },
+  {
+    "word": "ramb",
+    "cat": "Noun/Number",
+    "pos": "Noun",
+    "eng": "To crawl / to climb / to slither / surface-hugging locomotion"
   },
   {
     "word": "sklon",
