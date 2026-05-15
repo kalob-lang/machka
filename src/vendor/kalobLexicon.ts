@@ -2025,7 +2025,7 @@ export const lexiconData = [
     "word": "phirm",
     "cat": "Noun/Number",
     "pos": "Noun",
-    "eng": "Business / occupation"
+    "eng": "Occupation / profession / business / economic enterprise / career"
   },
   {
     "word": "thord",
@@ -2565,7 +2565,7 @@ export const lexiconData = [
     "word": "leb",
     "cat": "Noun/Number",
     "pos": "Noun",
-    "eng": "Work / labor / engineering"
+    "eng": "Labor / engineering / manual effort / physical construction"
   },
   {
     "word": "qhed",
@@ -3897,7 +3897,7 @@ export const lexiconData = [
     "word": "phajh",
     "cat": "Noun/Number",
     "pos": "Noun",
-    "eng": "To do / to make / to work / intentional execution"
+    "eng": "To execute / to operate / to do / intentional action"
   },
   {
     "word": "mvbh",
