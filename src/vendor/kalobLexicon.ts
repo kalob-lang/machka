@@ -5628,6 +5628,36 @@ export const lexiconData = [
     "eng": "Tremor / jolt / sudden kinetic shock / convulsion / concussive shake"
   },
   {
+    "word": "ring",
+    "cat": "Noun/Number",
+    "pos": "Noun",
+    "eng": "Ring / loop / orbit / torus / orbital path"
+  },
+  {
+    "word": "srajh",
+    "cat": "Noun/Number",
+    "pos": "Noun",
+    "eng": "To radiate / to shoot / high-velocity emission / radial"
+  },
+  {
+    "word": "lenz",
+    "cat": "Noun/Number",
+    "pos": "Noun",
+    "eng": "Lens / mirror / optical manipulation device"
+  },
+  {
+    "word": "kern",
+    "cat": "Noun/Number",
+    "pos": "Noun",
+    "eng": "Nucleus / dense core / atomic / nuclear"
+  },
+  {
+    "word": "spigh",
+    "cat": "Noun/Number",
+    "pos": "Noun",
+    "eng": "o inspire / inspiration / to enlighten / to spark a dormant state / to instill"
+  },
+  {
     "word": "w!",
     "cat": "Interjection",
     "eng": "Yearning / Insufficient (If only!, Not Enough!, More!)"
