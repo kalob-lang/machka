@@ -1,5 +1,5 @@
 self.onmessage = (e) => {
-  const { task, content, segmentationRule, translations, oldTranslations, translationSanitization } = e.data;
+  const { task, content, segmentationRule, cancelTriggers, translations, oldTranslations, translationSanitization } = e.data;
 
   const countWords = (text) => {
     if (typeof text !== 'string') return 0;
@@ -9,8 +9,42 @@ self.onmessage = (e) => {
   const rule = segmentationRule || '\n';
   const wrappedRule = `(${rule})`;
   const parts = content.split(new RegExp(wrappedRule));
-  const segments = parts.filter((_, i) => i % 2 === 0);
-  const delimiters = parts.filter((_, i) => i % 2 !== 0);
+  
+  let segments = [];
+  let delimiters = [];
+  const triggers = cancelTriggers?.filter(t => t.trim() !== '') || [];
+  
+  if (triggers.length === 0) {
+    segments = parts.filter((_, i) => i % 2 === 0);
+    delimiters = parts.filter((_, i) => i % 2 !== 0);
+  } else {
+    let currentSegment = parts[0] || '';
+    for (let i = 1; i < parts.length; i += 2) {
+      const delimiter = parts[i];
+      const nextSegment = parts[i + 1] || '';
+      
+      const textSoFar = currentSegment + delimiter;
+      const trimmedSoFar = textSoFar.trimEnd();
+      const segmentTrimmed = currentSegment.trimEnd();
+      
+      let isCancelled = false;
+      for (const trigger of triggers) {
+        if (trimmedSoFar.endsWith(trigger) || segmentTrimmed.endsWith(trigger)) {
+          isCancelled = true;
+          break;
+        }
+      }
+      
+      if (isCancelled) {
+        currentSegment = textSoFar + nextSegment;
+      } else {
+        segments.push(currentSegment);
+        delimiters.push(delimiter);
+        currentSegment = nextSegment;
+      }
+    }
+    segments.push(currentSegment);
+  }
 
   if (task === 'segment') {
     const newSegments = segments.map(s => s.trim()).filter(Boolean);

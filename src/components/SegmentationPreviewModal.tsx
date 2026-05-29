@@ -8,10 +8,12 @@ interface SegmentationPreviewModalProps {
   content: string;
   rule: string;
   originalRule: string;
+  cancelTriggers: string[];
+  originalCancelTriggers: string[];
   onExecute: () => void;
 }
 
-const SegmentationPreviewModal: React.FC<SegmentationPreviewModalProps> = ({ show, onHide, content, rule, originalRule, onExecute }) => {
+const SegmentationPreviewModal: React.FC<SegmentationPreviewModalProps> = ({ show, onHide, content, rule, originalRule, cancelTriggers, originalCancelTriggers, onExecute }) => {
   const [visibleCount, setVisibleCount] = useState(100);
   const { ref: sentinelRef, isIntersecting } = useIntersectionObserver({ threshold: 0.1 });
 
@@ -28,18 +30,55 @@ const SegmentationPreviewModal: React.FC<SegmentationPreviewModalProps> = ({ sho
     }
   }, [show]);
 
+  const hasChanges = rule !== originalRule || cancelTriggers.join('\n') !== originalCancelTriggers.join('\n');
+
   const highlightedContent = useMemo(() => {
     if (!show) return null;
 
     try {
-      const regex = new RegExp(rule, 'g');
-      const segments = content.split(regex);
-      let lastIndex = 0;
+      const wrappedRule = `(${rule})`;
+      const regex = new RegExp(wrappedRule, 'g');
+      const parts = content.split(regex);
+      
+      const triggers = cancelTriggers?.filter(t => t.trim() !== '') || [];
+      
+      let segments: string[] = [];
+      let delimiters: string[] = [];
+      
+      if (triggers.length === 0) {
+        segments = parts.filter((_, i) => i % 2 === 0);
+        delimiters = parts.filter((_, i) => i % 2 !== 0);
+      } else {
+        let currentSegment = parts[0] || '';
+        for (let i = 1; i < parts.length; i += 2) {
+          const delimiter = parts[i];
+          const nextSegment = parts[i + 1] || '';
+          
+          const textSoFar = currentSegment + delimiter;
+          const trimmedSoFar = textSoFar.trimEnd();
+          const segmentTrimmed = currentSegment.trimEnd();
+          
+          let isCancelled = false;
+          for (const trigger of triggers) {
+            if (trimmedSoFar.endsWith(trigger) || segmentTrimmed.endsWith(trigger)) {
+              isCancelled = true;
+              break;
+            }
+          }
+          
+          if (isCancelled) {
+            currentSegment = textSoFar + nextSegment;
+          } else {
+            segments.push(currentSegment);
+            delimiters.push(delimiter);
+            currentSegment = nextSegment;
+          }
+        }
+        segments.push(currentSegment);
+      }
 
       const highlighted = segments.slice(0, visibleCount).reduce<React.ReactNode[]>((acc, segment, index) => {
-        const match = content.substring(lastIndex).match(regex);
-        const delimiter = match ? match[0] : '';
-        lastIndex += segment.length + delimiter.length;
+        const delimiter = delimiters[index] || '';
         const color = `hsl(${(index * 60) % 360}, 100%, 75%)`;
         return [...acc, <span key={index} style={{ backgroundColor: color }}>{segment}</span>, delimiter];
       }, []);
@@ -53,7 +92,7 @@ const SegmentationPreviewModal: React.FC<SegmentationPreviewModalProps> = ({ sho
     } catch (error) {
       return <div className="alert alert-danger">Invalid regular expression.</div>;
     }
-  }, [content, rule, show, visibleCount, sentinelRef]);
+  }, [content, rule, cancelTriggers, show, visibleCount, sentinelRef]);
 
   return (
     <Modal show={show} onHide={onHide} size="lg">
@@ -67,9 +106,9 @@ const SegmentationPreviewModal: React.FC<SegmentationPreviewModalProps> = ({ sho
         {highlightedContent}
       </Modal.Body>
       <Modal.Footer>
-        {rule === originalRule && <span>No rule change</span>}
+        {!hasChanges && <span>No rule change</span>}
         <Button variant="secondary" onClick={onHide}>Close</Button>
-        {rule !== originalRule && <Button variant="danger" onClick={onExecute}>Execute</Button>}
+        {hasChanges && <Button variant="danger" onClick={onExecute}>Execute</Button>}
       </Modal.Footer>
     </Modal>
   );

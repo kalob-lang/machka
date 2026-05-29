@@ -55,6 +55,8 @@ const SourceEditor: React.FC<SourceEditorProps> = ({
   const [segmentationRule, setSegmentationRule] = useState('\n');
   const [segmentationRuleError, setSegmentationRuleError] = useState<string | null>(null);
   const [originalSegmentationRule, setOriginalSegmentationRule] = useState('\n');
+  const [cancelTriggers, setCancelTriggers] = useState('');
+  const [originalCancelTriggers, setOriginalCancelTriggers] = useState('');
   const [showSegPreview, setShowSegPreview] = useState(false);
   const [stats, setStats] = useState<Record<string, number | string>>({});
   const [sourceSize, setSourceSize] = useState(0);
@@ -124,6 +126,9 @@ const SourceEditor: React.FC<SourceEditorProps> = ({
       const rule = source.segmentationRule || '\n';
       setSegmentationRule(rule);
       setOriginalSegmentationRule(rule);
+      const initialCancelTriggers = source.cancelTriggers?.join('\n') || '';
+      setCancelTriggers(initialCancelTriggers);
+      setOriginalCancelTriggers(initialCancelTriggers);
       validateRegex(rule);
       setSourceSize(calculateSourceSize(source.id));
       
@@ -157,7 +162,14 @@ const SourceEditor: React.FC<SourceEditorProps> = ({
           setIsLoading(false);
         }
       };
-      worker.postMessage({ task: 'stats', content: decompressedContent, segmentationRule: rule, translations, translationSanitization });
+      worker.postMessage({ 
+        task: 'stats', 
+        content: decompressedContent, 
+        segmentationRule: rule, 
+        cancelTriggers: initialCancelTriggers.split('\n'),
+        translations, 
+        translationSanitization 
+      });
     }
   }, [source, translationsVersion, decompressedContent, setError, translationSanitization]);
 
@@ -232,6 +244,7 @@ const SourceEditor: React.FC<SourceEditorProps> = ({
       title,
       filename,
       content: finalContent,
+      cancelTriggers: cancelTriggers.split('\n').filter(t => t.trim() !== ''),
       compression: isCompressed,
       compressionLevel: compressionLevel
     };
@@ -251,6 +264,7 @@ const SourceEditor: React.FC<SourceEditorProps> = ({
     setFilenameError(null);
     setSegmentationRule(originalSegmentationRule);
     setSegmentationRuleError(null);
+    setCancelTriggers(originalCancelTriggers);
     setIsCompressed(originalCompression);
     setCompressionLevel(originalCompressionLevel as pako.DeflateFunctionOptions['level']);
   };
@@ -279,8 +293,13 @@ const SourceEditor: React.FC<SourceEditorProps> = ({
           success = success && handleSetItem(`translations_${source.id}`, translationsToStore);
 
           if (success) {
-            onSourceUpdate({ ...source, segmentationRule });
+            onSourceUpdate({ 
+              ...source, 
+              segmentationRule,
+              cancelTriggers: cancelTriggers.split('\n').filter(t => t.trim() !== '')
+            });
             setOriginalSegmentationRule(segmentationRule);
+            setOriginalCancelTriggers(cancelTriggers);
             setShowSegPreview(false);
           }
           setIsExecutingSegmentation(false);
@@ -300,7 +319,13 @@ const SourceEditor: React.FC<SourceEditorProps> = ({
           setError({ title: 'Data Error', message: `Could not read translations for segmentation: ${e.message}` });
         }
       }
-      worker.postMessage({ task: 'segment', content: decompressedContent, segmentationRule, oldTranslations });
+      worker.postMessage({ 
+        task: 'segment', 
+        content: decompressedContent, 
+        segmentationRule, 
+        cancelTriggers: cancelTriggers.split('\n').filter(t => t.trim() !== ''),
+        oldTranslations 
+      });
     }
   };
 
@@ -385,7 +410,7 @@ const SourceEditor: React.FC<SourceEditorProps> = ({
     });
   };
 
-  const isContentChanged = title !== originalTitle || content !== originalContent || filename !== originalFilename || isCompressed !== originalCompression || compressionLevel !== originalCompressionLevel;
+  const isContentChanged = title !== originalTitle || content !== originalContent || filename !== originalFilename || isCompressed !== originalCompression || compressionLevel !== originalCompressionLevel || cancelTriggers !== originalCancelTriggers;
 
   if (!source) {
     return <div>
@@ -469,43 +494,59 @@ const SourceEditor: React.FC<SourceEditorProps> = ({
             </Stack>
           </Form>
 
-          <div className="mt-4">
-            <h2>Segmentation</h2>
+          <Card className="mt-4">
+            <Card.Header>Segmentation</Card.Header>
+            <Card.Body>
+              <Form.Group controlId="segmentationRule" className="mt-2">
+                <Form.Label>Regular Expression</Form.Label>
+                <Alert variant="warning">
+                  Changing the segmentation regular expression or cancel triggers will erase existing translations unless there is a segment with an exactly matching source text.
+                </Alert>
+                <Form.Control 
+                  type="text" 
+                  placeholder="Enter regex" 
+                  value={segmentationRule} 
+                  onChange={(e) => { 
+                    const val = e.target.value;
+                    setSegmentationRule(val);
+                    validateRegex(val);
+                  }} 
+                  isInvalid={!!segmentationRuleError}
+                  list='defaultSegmentationRules'
+                />
+                <Form.Control.Feedback type="invalid">
+                  {segmentationRuleError}
+                </Form.Control.Feedback>
+              </Form.Group>
+              <datalist id='defaultSegmentationRules'>
+                <option value='\n'/>
+                <option value='\. '/>
+                <option value='\.|;'/>
+                <option value={"[\\.:;?!][\\s\"']*|,\\s*\""}/>
+              </datalist>
 
-            <Form.Group controlId="segmentationRule" className="mt-2">
-              <Form.Label>Regular Expression</Form.Label>
-              <Alert variant="warning">
-                Changing the segmentation regular expression will erase existing translations unless there is a segment with an exactly matching source text.
-              </Alert>
-              <Form.Control 
-                type="text" 
-                placeholder="Enter regex" 
-                value={segmentationRule} 
-                onChange={(e) => { 
-                  const val = e.target.value;
-                  setSegmentationRule(val);
-                  validateRegex(val);
-                }} 
-                isInvalid={!!segmentationRuleError}
-                list='defaultSegmentationRules'
-              />
-              <Form.Control.Feedback type="invalid">
-                {segmentationRuleError}
-              </Form.Control.Feedback>
-            </Form.Group>
-            <datalist id='defaultSegmentationRules'>
-              <option value='\n'/>
-              <option value='\. '/>
-              <option value='\.|;'/>
-              <option value={"[\\.:;?!][\\s\"']*|,\\s*\""}/>
-            </datalist>
-            <Stack direction="horizontal" gap={2}>
-              <Button variant="info" onClick={() => setShowSegPreview(true)} className="mt-2" disabled={isExecutingSegmentation || !!segmentationRuleError}>
-                Preview
-              </Button>
-              {isExecutingSegmentation && <Spinner animation="border" size="sm" className="mt-2" />}
-            </Stack>
-          </div>
+              <Form.Group controlId="cancelTriggers" className="mt-3">
+                <Form.Label>Cancel Triggers</Form.Label>
+                <Form.Control 
+                  as="textarea" 
+                  rows={3} 
+                  placeholder="Enter cancel triggers (one per line) e.g., Mr." 
+                  value={cancelTriggers} 
+                  onChange={(e) => setCancelTriggers(e.target.value)} 
+                />
+                <Form.Text muted>
+                  Segments ending with these exact sequences before a split will be merged. One trigger per line.
+                </Form.Text>
+              </Form.Group>
+
+              <Stack direction="horizontal" gap={2} className="mt-4">
+                <Button variant="info" onClick={() => setShowSegPreview(true)} disabled={isExecutingSegmentation || !!segmentationRuleError}>
+                  Preview
+                </Button>
+                {isExecutingSegmentation && <Spinner animation="border" size="sm" />}
+              </Stack>
+            </Card.Body>
+          </Card>
 
           <Card className="mt-4">
             <Card.Header>Compression</Card.Header>
@@ -586,6 +627,8 @@ const SourceEditor: React.FC<SourceEditorProps> = ({
             content={content} 
             rule={segmentationRule} 
             originalRule={originalSegmentationRule}
+            cancelTriggers={cancelTriggers.split('\n').filter(t => t.trim() !== '')}
+            originalCancelTriggers={originalCancelTriggers.split('\n').filter(t => t.trim() !== '')}
             onExecute={handleSegmentationSave}
           />
         </>

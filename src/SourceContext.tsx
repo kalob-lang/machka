@@ -48,9 +48,46 @@ export const SourceProvider: React.FC<{ source: Source | null, children: React.R
     try {
       const regex = new RegExp(wrappedRule, 'g');
       const parts = decompressedContent.split(regex);
-      const segments = parts.filter((_, i) => i % 2 === 0);
-      const delimiters = parts.filter((_, i) => i % 2 !== 0);
-      return { segments, delimiters };
+      
+      const triggers = source.cancelTriggers?.filter(t => t.trim() !== '') || [];
+      if (triggers.length === 0) {
+        return {
+          segments: parts.filter((_, i) => i % 2 === 0),
+          delimiters: parts.filter((_, i) => i % 2 !== 0)
+        };
+      }
+      
+      const mergedSegments: string[] = [];
+      const mergedDelimiters: string[] = [];
+      let currentSegment = parts[0] || '';
+      
+      for (let i = 1; i < parts.length; i += 2) {
+        const delimiter = parts[i];
+        const nextSegment = parts[i + 1] || '';
+        
+        const textSoFar = currentSegment + delimiter;
+        const trimmedSoFar = textSoFar.trimEnd();
+        const segmentTrimmed = currentSegment.trimEnd();
+        
+        let isCancelled = false;
+        for (const trigger of triggers) {
+          if (trimmedSoFar.endsWith(trigger) || segmentTrimmed.endsWith(trigger)) {
+            isCancelled = true;
+            break;
+          }
+        }
+        
+        if (isCancelled) {
+          currentSegment = textSoFar + nextSegment;
+        } else {
+          mergedSegments.push(currentSegment);
+          mergedDelimiters.push(delimiter);
+          currentSegment = nextSegment;
+        }
+      }
+      mergedSegments.push(currentSegment);
+      
+      return { segments: mergedSegments, delimiters: mergedDelimiters };
     } catch (e) {
       // Invalid regex, return content as a single segment
       return { segments: [decompressedContent], delimiters: [] };

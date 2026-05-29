@@ -20,6 +20,7 @@ export interface Source {
   filename: string;
   content: string;
   segmentationRule?: string;
+  cancelTriggers?: string[];
   defaultGrammarRule?: string;
   created?: number;
   modified?: number;
