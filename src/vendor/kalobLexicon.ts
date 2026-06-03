@@ -5658,6 +5658,72 @@ export const lexiconData = [
     "eng": "o inspire / inspiration / to enlighten / to spark a dormant state / to instill"
   },
   {
+    "word": "sord",
+    "cat": "Noun/Number",
+    "pos": "Noun",
+    "eng": "To go out / to exit / egress / outward boundary crossing"
+  },
+  {
+    "word": "prod",
+    "cat": "Noun/Number",
+    "pos": "Noun",
+    "eng": "To produce / to yield / industrial or agricultural output"
+  },
+  {
+    "word": "steln",
+    "cat": "Noun/Number",
+    "pos": "Noun",
+    "eng": "To send / to deliver / to dispatch a payload"
+  },
+  {
+    "word": "phlob",
+    "cat": "Noun/Number",
+    "pos": "Noun",
+    "eng": "To develop / to grow / systemic or biological progression"
+  },
+  {
+    "word": "phibh",
+    "cat": "Noun/Number",
+    "pos": "Noun",
+    "eng": "Alive / living / vitality / active biological state"
+  },
+  {
+    "word": "trib",
+    "cat": "Noun/Number",
+    "pos": "Noun",
+    "eng": "Journey / travel / expedition / sustained macro-traversal"
+  },
+  {
+    "word": "skand",
+    "cat": "Noun/Number",
+    "pos": "Noun",
+    "eng": "Joke / humor / funny / to tease"
+  },
+  {
+    "word": "pozm",
+    "cat": "Noun/Number",
+    "pos": "Noun",
+    "eng": "To ridicule / to mock / to deride / targeted social depreciation"
+  },
+  {
+    "word": "shlin",
+    "cat": "Noun/Number",
+    "pos": "Noun",
+    "eng": "Plant / flora / botanical life / anchored vegetation"
+  },
+  {
+    "word": "yalbh",
+    "cat": "Noun/Number",
+    "pos": "Noun",
+    "eng": "Barren / desolate / destitute / sterile / zero-yield state"
+  },
+  {
+    "word": "yez",
+    "cat": "Noun/Number",
+    "pos": "Noun",
+    "eng": "Wild / untamed / feral / unregulated biology / wilderness"
+  },
+  {
     "word": "w!",
     "cat": "Interjection",
     "eng": "Yearning / Insufficient (If only!, Not Enough!, More!)"
