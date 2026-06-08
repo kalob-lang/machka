@@ -4869,13 +4869,13 @@ export const lexiconData = [
     "word": "sonz",
     "cat": "Noun/Number",
     "pos": "Noun",
-    "eng": "To fight / battle"
+    "eng": "Combat / battle / violent physical conflict / to engage in warfare"
   },
   {
     "word": "strwg",
     "cat": "Noun/Number",
     "pos": "Noun",
-    "eng": "To struggle / to fight"
+    "eng": "To compete / to contend / to struggle / non-lethal friction over a resource"
   },
   {
     "word": "slan",
