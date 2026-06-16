@@ -3207,7 +3207,7 @@ export const lexiconData = [
     "word": "rilz",
     "cat": "Noun/Number",
     "pos": "Noun",
-    "eng": "To know / to realize / to be aware"
+    "eng": "To understand / to comprehend / to successfully parse meaning"
   },
   {
     "word": "speg",
@@ -5722,6 +5722,168 @@ export const lexiconData = [
     "cat": "Noun/Number",
     "pos": "Noun",
     "eng": "Wild / untamed / feral / unregulated biology / wilderness"
+  },
+  {
+    "word": "yolzh",
+    "cat": "Noun/Number",
+    "pos": "Noun",
+    "eng": "ever / at some time / at any time"
+  },
+  {
+    "word": "raz",
+    "cat": "Noun/Number",
+    "pos": "Noun",
+    "eng": "Mystery / unknown / enigma"
+  },
+  {
+    "word": "kridh",
+    "cat": "Noun/Number",
+    "pos": "Noun",
+    "eng": "To call / to summon / targeted acoustic or logistical signal"
+  },
+  {
+    "word": "shogh",
+    "cat": "Noun/Number",
+    "pos": "Noun",
+    "eng": "To untie / to solve / to decrypt / to unravel / to disassemble a problem"
+  },
+  {
+    "word": "kamb",
+    "cat": "Noun/Number",
+    "pos": "Noun",
+    "eng": "Camp / base / deployable operational hub / temporary settlement"
+  },
+  {
+    "word": "phang",
+    "cat": "Noun/Number",
+    "pos": "Noun",
+    "eng": "To catch / to capture / to arrest / kinetic apprehension of an entity"
+  },
+  {
+    "word": "skabh",
+    "cat": "Noun/Number",
+    "pos": "Noun",
+    "eng": "Cabinet / cupboard / dresser / stationary storage furniture"
+  },
+  {
+    "word": "shlan",
+    "cat": "Noun/Number",
+    "pos": "Noun",
+    "eng": "Table / desk / elevated operational plane"
+  },
+  {
+    "word": "shez",
+    "cat": "Noun/Number",
+    "pos": "Noun",
+    "eng": "Chair / seat / backed human anchor point"
+  },
+  {
+    "word": "nyaljh",
+    "cat": "Noun/Number",
+    "pos": "Noun",
+    "eng": "Bed / biological regeneration platform"
+  },
+  {
+    "word": "khom",
+    "cat": "Noun/Number",
+    "pos": "Noun",
+    "eng": "Material / consumable resource / ingredient / logistical input"
+  },
+  {
+    "word": "srabh",
+    "cat": "Noun/Number",
+    "pos": "Noun",
+    "eng": "To burn / to combust / thermodynamic consumption"
+  },
+  {
+    "word": "krog",
+    "cat": "Noun/Number",
+    "pos": "Noun",
+    "eng": "Step / pace / a discrete sequential unit / an increment"
+  },
+  {
+    "word": "com",
+    "cat": "Noun/Number",
+    "pos": "Noun",
+    "eng": "Market / to trade / commerce / mercantile / retail"
+  },
+  {
+    "word": "srajh",
+    "cat": "Noun/Number",
+    "pos": "Noun",
+    "eng": "To radiate / to shoot / high-velocity emission / radial"
+  },
+  {
+    "word": "khizm",
+    "cat": "Noun/Number",
+    "pos": "Noun",
+    "eng": "To invite / social request for presence / hospitality vector"
+  },
+  {
+    "word": "phang",
+    "cat": "Noun/Number",
+    "pos": "Noun",
+    "eng": "To catch / to capture / to arrest / kinetic apprehension of an entity"
+  },
+  {
+    "word": "skabh",
+    "cat": "Noun/Number",
+    "pos": "Noun",
+    "eng": "Cabinet / cupboard / dresser / stationary storage furniture"
+  },
+  {
+    "word": "shlan",
+    "cat": "Noun/Number",
+    "pos": "Noun",
+    "eng": "Table / desk / elevated operational plane"
+  },
+  {
+    "word": "shez",
+    "cat": "Noun/Number",
+    "pos": "Noun",
+    "eng": "Chair / seat / backed human anchor point"
+  },
+  {
+    "word": "nyaljh",
+    "cat": "Noun/Number",
+    "pos": "Noun",
+    "eng": "Bed / biological regeneration platform"
+  },
+  {
+    "word": "khom",
+    "cat": "Noun/Number",
+    "pos": "Noun",
+    "eng": "Material / consumable resource / ingredient / logistical input"
+  },
+  {
+    "word": "srabh",
+    "cat": "Noun/Number",
+    "pos": "Noun",
+    "eng": "To burn / to combust / thermodynamic consumption"
+  },
+  {
+    "word": "krog",
+    "cat": "Noun/Number",
+    "pos": "Noun",
+    "eng": "Step / pace / a discrete sequential unit / an increment"
+  },
+  {
+    "word": "com",
+    "cat": "Noun/Number",
+    "pos": "Noun",
+    "eng": "Market / to trade / commerce / mercantile / retail"
+  },
+  {
+    "word": "srajh",
+    "cat": "Noun/Number",
+    "pos": "Noun",
+    "eng": "To radiate / to shoot / high-velocity emission / radial"
+  },
+  {
+    "word": "khizm",
+    "cat": "Noun/Number",
+    "pos": "Noun",
+    "eng": "To invite / social request for presence / hospitality vector"
   },
   {
     "word": "w!",
