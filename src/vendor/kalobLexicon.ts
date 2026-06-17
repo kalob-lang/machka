@@ -1329,7 +1329,7 @@ export const lexiconData = [
     "word": "thro",
     "cat": "Connective",
     "pos": "Preposition",
-    "eng": "Through"
+    "eng": "Through, across"
   },
   {
     "word": "phyo",
@@ -4971,19 +4971,19 @@ export const lexiconData = [
     "word": "rozd",
     "cat": "Noun/Number",
     "pos": "Noun",
-    "eng": "To burn / to roast / to heat\t"
+    "eng": "To burn / to roast / to heat"
   },
   {
-    "word": "prod",
+    "word": "sord",
     "cat": "Noun/Number",
     "pos": "Noun",
-    "eng": "To go out / exit / produce\t"
+    "eng": "To go out / to exit / egress / outward boundary crossing"
   },
   {
     "word": "sorb",
     "cat": "Noun/Number",
     "pos": "Noun",
-    "eng": "To suck / inhale / absorb\t"
+    "eng": "To suck / inhale / absorb"
   },
   {
     "word": "leng",
@@ -5658,12 +5658,6 @@ export const lexiconData = [
     "eng": "o inspire / inspiration / to enlighten / to spark a dormant state / to instill"
   },
   {
-    "word": "sord",
-    "cat": "Noun/Number",
-    "pos": "Noun",
-    "eng": "To go out / to exit / egress / outward boundary crossing"
-  },
-  {
     "word": "prod",
     "cat": "Noun/Number",
     "pos": "Noun",
@@ -5808,12 +5802,6 @@ export const lexiconData = [
     "eng": "Market / to trade / commerce / mercantile / retail"
   },
   {
-    "word": "srajh",
-    "cat": "Noun/Number",
-    "pos": "Noun",
-    "eng": "To radiate / to shoot / high-velocity emission / radial"
-  },
-  {
     "word": "khizm",
     "cat": "Noun/Number",
     "pos": "Noun",
@@ -5872,12 +5860,6 @@ export const lexiconData = [
     "cat": "Noun/Number",
     "pos": "Noun",
     "eng": "Market / to trade / commerce / mercantile / retail"
-  },
-  {
-    "word": "srajh",
-    "cat": "Noun/Number",
-    "pos": "Noun",
-    "eng": "To radiate / to shoot / high-velocity emission / radial"
   },
   {
     "word": "khizm",
