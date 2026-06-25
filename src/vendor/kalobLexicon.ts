@@ -1242,6 +1242,12 @@ export const lexiconData = [
     "eng": "From (direction)"
   },
   {
+    "word": "on",
+    "cat": "Connective",
+    "pos": "Preposition",
+    "eng": "Since / from a point in time"
+  },
+  {
     "word": "ob",
     "cat": "Connective",
     "pos": "Preposition",
@@ -1485,7 +1491,7 @@ export const lexiconData = [
     "word": "snw",
     "cat": "Connective",
     "pos": "Conjunction",
-    "eng": "Since (causal/temporal)"
+    "eng": "Since (causal/explanatory)"
   },
   {
     "word": "cw",
