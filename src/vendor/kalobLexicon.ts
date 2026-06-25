@@ -846,8 +846,14 @@ export const lexiconData = [
     "pos": "Pronoun"
   },
   {
-    "word": "sma",
+    "word": "sya",
     "eng": "none, no one, not one",
+    "cat": "Designative",
+    "pos": "Pronoun"
+  },
+  {
+    "word": "sma",
+    "eng": "oneself, itself",
     "cat": "Designative",
     "pos": "Pronoun"
   },
@@ -900,7 +906,7 @@ export const lexiconData = [
     "pos": "Pronoun"
   },
   {
-    "word": "sya",
+    "word": "tra",
     "eng": "others, of others, to others, unto others",
     "cat": "Designative",
     "pos": "Pronoun"
@@ -5655,7 +5661,7 @@ export const lexiconData = [
     "word": "spigh",
     "cat": "Noun/Number",
     "pos": "Noun",
-    "eng": "o inspire / inspiration / to enlighten / to spark a dormant state / to instill"
+    "eng": "To inspire / inspiration / to enlighten / to spark a dormant state / to instill"
   },
   {
     "word": "prod",
@@ -5866,6 +5872,138 @@ export const lexiconData = [
     "cat": "Noun/Number",
     "pos": "Noun",
     "eng": "To invite / social request for presence / hospitality vector"
+  },
+  {
+    "word": "selbh",
+    "cat": "Noun/Number",
+    "pos": "Noun",
+    "eng": "Self / ego / the individual anchor / subjective origin"
+  },
+  {
+    "word": "pharm",
+    "cat": "Noun/Number",
+    "pos": "Noun",
+    "eng": "Agriculture / farming / macro-cultivation of biology"
+  },
+  {
+    "word": "tord",
+    "cat": "Noun/Number",
+    "pos": "Noun",
+    "eng": "To harvest / to collect / to retract / to pull resources inward"
+  },
+  {
+    "word": "pon",
+    "cat": "Noun/Number",
+    "pos": "Noun",
+    "eng": "To compel / to impose / to enforce / coercion"
+  },
+  {
+    "word": "sed",
+    "cat": "Noun/Number",
+    "pos": "Noun",
+    "eng": "Reverse / opposite / to invert / 180-degree state flip"
+  },
+  {
+    "word": "maljh",
+    "cat": "Noun/Number",
+    "pos": "Noun",
+    "eng": "Microscopic / infinitesimal / trace scale / micro-"
+  },
+  {
+    "word": "kolm",
+    "cat": "Noun/Number",
+    "pos": "Noun",
+    "eng": "Macroscopic / grand / overarching / macro-system scale"
+  },
+  {
+    "word": "khim",
+    "cat": "Noun/Number",
+    "pos": "Noun",
+    "eng": "Membrane / thin film / permeable boundary layer"
+  },
+  {
+    "word": "sabh",
+    "cat": "Noun/Number",
+    "pos": "Noun",
+    "eng": "To know / to possess data / cognitive registry / to hold a fact"
+  },
+  {
+    "word": "charm",
+    "cat": "Noun/Number",
+    "pos": "Noun",
+    "eng": "Charm / allure / charisma / social magnetism"
+  },
+  {
+    "word": "shirn",
+    "cat": "Noun/Number",
+    "pos": "Noun",
+    "eng": "Cute / adorable / endearing / innocent appeal"
+  },
+  {
+    "word": "tidh",
+    "cat": "Noun/Number",
+    "pos": "Noun",
+    "eng": "To respond / to react / systemic feedback / physical or chemical response"
+  },
+  {
+    "word": "plidh",
+    "cat": "Noun/Number",
+    "pos": "Noun",
+    "eng": "To multiply / to scale / exponential duplication"
+  },
+  {
+    "word": "qed",
+    "cat": "Noun/Number",
+    "pos": "Noun",
+    "eng": "Formula / equation / rigid pattern / mathematical expression"
+  },
+  {
+    "word": "rizd",
+    "cat": "Noun/Number",
+    "pos": "Noun",
+    "eng": "Grid / lattice / cell / discrete structural framework"
+  },
+  {
+    "word": "stabh",
+    "cat": "Noun/Number",
+    "pos": "Noun",
+    "eng": "Pole / shaft / rod / stick / rigid linear structure"
+  },
+  {
+    "word": "qond",
+    "cat": "Noun/Number",
+    "pos": "Noun",
+    "eng": "Habit / custom / routine / conditioned behavioral inertia"
+  },
+  {
+    "word": "spend",
+    "cat": "Noun/Number",
+    "pos": "Noun",
+    "eng": "To spend / to cost / expense / deliberate resource consumption"
+  },
+  {
+    "word": "shab",
+    "cat": "Noun/Number",
+    "pos": "Noun",
+    "eng": "To scrape / to scratch / to shave / destructive surface abrasion"
+  },
+  {
+    "word": "chaz",
+    "cat": "Noun/Number",
+    "pos": "Noun",
+    "eng": "Attitude / posture / demeanor / expressive state / stance"
+  },
+  {
+    "word": "kyolz",
+    "cat": "Noun/Number",
+    "pos": "Noun",
+    "eng": "Cage / prison / inescapable enclosure / forced containment"
+  },
+  {
+    "word": "thiz",
+    "cat": "Noun/Number",
+    "pos": "Noun",
+    "eng": "To report / to announce / journalism / official broadcast or publication"
   },
   {
     "word": "w!",
