@@ -588,25 +588,25 @@ export const lexiconData = [
     "pos": "Demonstrative"
   },
   {
-    "word": "ajh",
+    "word": "ag",
     "eng": "this, this one",
     "cat": "Designative",
     "pos": "Demonstrative"
   },
   {
-    "word": "ajhe",
+    "word": "age",
     "eng": "these, these ones",
     "cat": "Designative",
     "pos": "Demonstrative"
   },
   {
-    "word": "abh",
+    "word": "ajh",
     "eng": "that, that one",
     "cat": "Designative",
     "pos": "Demonstrative"
   },
   {
-    "word": "abhe",
+    "word": "ajhe",
     "eng": "those, those ones",
     "cat": "Designative",
     "pos": "Demonstrative"
@@ -768,7 +768,7 @@ export const lexiconData = [
     "pos": "Pronoun"
   },
   {
-    "word": "ag",
+    "word": "azh",
     "eng": "any, whatever",
     "cat": "Designative",
     "pos": "Pronoun"
@@ -786,7 +786,7 @@ export const lexiconData = [
     "pos": "Pronoun"
   },
   {
-    "word": "azh",
+    "word": "abh",
     "eng": "other, the other, another",
     "cat": "Designative",
     "pos": "Pronoun"
@@ -924,7 +924,7 @@ export const lexiconData = [
     "pos": "Pronoun"
   },
   {
-    "word": "age",
+    "word": "azhe",
     "eng": "any, whatever",
     "cat": "Designative",
     "pos": "Pronoun"
@@ -942,7 +942,7 @@ export const lexiconData = [
     "pos": "Pronoun"
   },
   {
-    "word": "azhe",
+    "word": "abhe",
     "eng": "others, the others",
     "cat": "Designative",
     "pos": "Pronoun"
