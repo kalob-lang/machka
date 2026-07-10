@@ -3375,7 +3375,7 @@ export const lexiconData = [
     "word": "myezd",
     "cat": "Noun/Number",
     "pos": "Noun",
-    "eng": "City / urban / wall"
+    "eng": "City / urban"
   },
   {
     "word": "kend",
