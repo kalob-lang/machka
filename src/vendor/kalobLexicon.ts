@@ -1500,6 +1500,24 @@ export const lexiconData = [
     "eng": "Provided that"
   },
   {
+    "word": "sri",
+    "cat": "Connective",
+    "pos": "Conjunction",
+    "eng": "In proportion to / at the rate of"
+  },
+  {
+    "word": "rw",
+    "cat": "Connective",
+    "pos": "Conjunction",
+    "eng": "Than / In comparison to"
+  },
+  {
+    "word": "plazh",
+    "cat": "Modificative",
+    "pos": "Adverb",
+    "eng": "Somewhere / at some place"
+  },
+  {
     "word": "cazh",
     "cat": "Modificative",
     "pos": "Adverb",
@@ -6010,6 +6028,72 @@ export const lexiconData = [
     "cat": "Noun/Number",
     "pos": "Noun",
     "eng": "To report / to announce / journalism / official broadcast or publication"
+  },
+  {
+    "word": "shom",
+    "cat": "Noun/Number",
+    "pos": "Noun",
+    "eng": "Problem / issue / topic / subject of focus / prompt"
+  },
+  {
+    "word": "keg",
+    "cat": "Noun/Number",
+    "pos": "Noun",
+    "eng": "Weird / strange / bizarre / jarringly abnormal"
+  },
+  {
+    "word": "kond",
+    "cat": "Noun/Number",
+    "pos": "Noun",
+    "eng": "To narrate / to recount / linear storytelling / sequential broadcast of events"
+  },
+  {
+    "word": "ken",
+    "cat": "Noun/Number",
+    "pos": "Noun",
+    "eng": "Arm / forelimb / structural shaft of a limb"
+  },
+  {
+    "word": "khvzd",
+    "cat": "Noun/Number",
+    "pos": "Noun",
+    "eng": "Cough / respiratory expulsion / airway clearing reflex"
+  },
+  {
+    "word": "phorl",
+    "cat": "Noun/Number",
+    "pos": "Noun",
+    "eng": "To forgive / psychological pardon / emotional release of debt"
+  },
+  {
+    "word": "phebh",
+    "cat": "Noun/Number",
+    "pos": "Noun",
+    "eng": "To avoid / to dodge / kinetic evasion"
+  },
+  {
+    "word": "klajh",
+    "cat": "Noun/Number",
+    "pos": "Noun",
+    "eng": "To clap / to slap / flat surface percussion / non-destructive impact"
+  },
+  {
+    "word": "nvnjh",
+    "cat": "Noun/Number",
+    "pos": "Noun",
+    "eng": "To point / to indicate / to aim / target designation / vector alignment"
+  },
+  {
+    "word": "stin",
+    "cat": "Noun/Number",
+    "pos": "Noun",
+    "eng": "Wall / vertical structural boundary / physical barrier"
+  },
+  {
+    "word": "lyalz",
+    "cat": "Noun/Number",
+    "pos": "Noun",
+    "eng": "Loyal / faithful / absolute allegiance"
   },
   {
     "word": "w!",
