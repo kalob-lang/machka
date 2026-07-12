@@ -25,12 +25,35 @@ interface SpellCheckEditorProps {
 }
 
 const nounRootsArray = lexiconData.filter(w => w.cat === 'Noun/Number').map(w => w.word.toLowerCase()).sort((a,b) => b.length - a.length);
+const strictNounRootsArray = lexiconData.filter(w => w.cat === 'Noun/Number' && w.pos !== 'Numeral').map(w => w.word.toLowerCase()).sort((a,b) => b.length - a.length);
 const allRoots = new Set(lexiconData.map(w => w.word.toLowerCase()));
 const suffixesArray = commonSuffixes.map(s => s.suffix.toLowerCase()).sort((a,b) => b.length - a.length);
 
-const nounPattern = `(?:${nounRootsArray.join('|')})`;
+const nonZeroDigit = 'phwn|tvbh|threz|qad|phabh|sigz|sebd|khogd|nobh';
+const digit = `ling|${nonZeroDigit}`;
+const teens = `ce(?:${nonZeroDigit})`;
+const tenBase = `cen|${teens}|(?:${nonZeroDigit}|${teens})en`;
+const hundredsDigit = `tvbh|threz|qad|phabh|sigz|sebd|khogd|nobh|${teens}`;
+const hundredBase = `khwnd|(?:${hundredsDigit})wnd`;
+
+const multiplier = `(?:${hundredBase}|${tenBase}|${digit})`;
+const myoBlock = `(?:${multiplier})?myo(?:n|${multiplier})`;
+const numberEntity = `(?:${myoBlock}|${multiplier})`;
+
+const numberSuffixPattern = `(?:am|idh|oz|om|erl|old|in|ag|od)`;
+const nounPattern = `(?:${strictNounRootsArray.join('|')})`;
 const suffixPattern = `(?:${suffixesArray.join('|')})`;
-const compoundRegex = new RegExp(`^[aeiouvw]?${nounPattern}(?:u${nounPattern})?(?:${suffixPattern}){0,3}u?[eioavw]?(?:zh|j)?$`);
+
+const modifier = `(?:${nounPattern}|${numberEntity})`;
+const headNoun = `${nounPattern}(?:${suffixPattern}){0,3}`;
+const headNumber = `${numberEntity}(?:${numberSuffixPattern}){0,3}`;
+const coreCompound = `(?:(?:${modifier}u)?(?:${headNoun}|${headNumber}))`;
+
+const compoundRegex = new RegExp(`^[aeiouvw]?${coreCompound}u?[eioavw]?(?:zh|j)?$`);
+
+const numRegex = new RegExp(`^${numberEntity}`);
+const nounRegex = new RegExp(`^${nounPattern}`);
+const baseTeenRegex = new RegExp(`^(?:${nonZeroDigit}|${teens})$`);
 
 function checkSpelling(word: string): boolean {
     const lowerWord = word.toLowerCase();
@@ -52,8 +75,30 @@ const SpellCheckEditor: React.FC<SpellCheckEditorProps> = ({ value, onChange, on
   useEffect(() => {
     let isCancelled = false;
 
+    const nonZeroDigits = [
+        {word: 'phwn', num: 1}, {word: 'tvbh', num: 2}, {word: 'threz', num: 3},
+        {word: 'qad', num: 4}, {word: 'phabh', num: 5}, {word: 'sigz', num: 6},
+        {word: 'sebd', num: 7}, {word: 'khogd', num: 8}, {word: 'nobh', num: 9}
+    ];
+    const generatedNumbers: KalobLexiconResult[] = [];
+    nonZeroDigits.forEach(d => {
+        generatedNumbers.push({ word: `ce${d.word}`, eng: `${d.num + 10} / ${d.num + 10}`, cat: 'Noun/Number', pos: 'Numeral' });
+        
+        generatedNumbers.push({ word: `${d.word}en`, eng: `${d.num * 10} / ${d.num * 10}`, cat: 'Noun/Number', pos: 'Numeral' });
+        generatedNumbers.push({ word: `ce${d.word}en`, eng: `${(d.num + 10) * 10} / ${(d.num + 10) * 10}`, cat: 'Noun/Number', pos: 'Numeral' });
+        
+        if (d.num > 1) {
+            generatedNumbers.push({ word: `${d.word}wnd`, eng: `${d.num * 100} / ${d.num * 100}`, cat: 'Noun/Number', pos: 'Numeral' });
+        }
+        generatedNumbers.push({ word: `ce${d.word}wnd`, eng: `${(d.num + 10) * 100} / ${(d.num + 10) * 100}`, cat: 'Noun/Number', pos: 'Numeral' });
+        
+        generatedNumbers.push({ word: `${d.word}myon`, eng: `${d.num * 1000} / ${d.num * 1000}`, cat: 'Noun/Number', pos: 'Numeral' });
+        generatedNumbers.push({ word: `ce${d.word}myon`, eng: `${(d.num + 10) * 1000} / ${(d.num + 10) * 1000}`, cat: 'Noun/Number', pos: 'Numeral' });
+    });
+
     const unifiedLexicon = [
       ...lexiconData,
+      ...generatedNumbers,
       ...commonSuffixes.map(s => ({
         word: s.suffix,
         eng: s.desc,
@@ -83,6 +128,39 @@ const SpellCheckEditor: React.FC<SpellCheckEditorProps> = ({ value, onChange, on
         word: s.suffix,
         eng: s.desc,
         cat: 'Primary Ending',
+        pos: s.name
+      })),
+      ...[
+        { suffix: 'am', name: 'Collective', desc: 'Unit, Pair, Dozen' },
+        { suffix: 'idh', name: 'Ordinal', desc: 'First, Second, Third' },
+        { suffix: 'oz', name: 'Multiplier', desc: 'Single, Double, Triple' },
+        { suffix: 'om', name: 'Division', desc: 'Quarter' },
+        { suffix: 'erl', name: 'Distinctive Collective', desc: 'of three kinds' },
+        { suffix: 'old', name: 'Multiplicative', desc: 'Once, Twice, Thrice' },
+        { suffix: 'in', name: 'Inhabitant', desc: 'Russian' },
+        { suffix: 'ag', name: 'Spouse', desc: "Baker's spouse" },
+        { suffix: 'od', name: 'Periodic table element', desc: '"eightium" (oxygen)' }
+      ].map(s => ({
+        word: s.suffix,
+        eng: s.desc,
+        cat: 'Number Suffix',
+        pos: s.name
+      })),
+      ...[
+        { suffix: 'en', name: 'Tens', desc: 'Forms tens' },
+        { suffix: 'wnd', name: 'Hundreds', desc: 'Forms hundreds' }
+      ].map(s => ({
+        word: s.suffix,
+        eng: s.desc,
+        cat: 'Base Number Suffix',
+        pos: s.name
+      })),
+      ...[
+        { suffix: 'u', name: 'Plural/Compound', desc: 'Plurality and compounding' }
+      ].map(s => ({
+        word: s.suffix,
+        eng: s.desc,
+        cat: 'Shared Suffix',
         pos: s.name
       }))
     ];
@@ -135,44 +213,60 @@ const SpellCheckEditor: React.FC<SpellCheckEditorProps> = ({ value, onChange, on
             parsedLength += 1;
         }
 
-        let root1 = '';
-        for (const root of nounRootsArray) {
-            if (textToParse.startsWith(root, parsedLength)) {
-                root1 = root;
-                break;
+        const getBestRoot = (text: string) => {
+            const numMatch = text.match(numRegex);
+            const nounMatch = text.match(nounRegex);
+            let root = '';
+            let isNumber = false;
+            let isBaseTeen = false;
+            if (numMatch && nounMatch) {
+                if (numMatch[0].length >= nounMatch[0].length) {
+                    root = numMatch[0];
+                    isNumber = true;
+                } else {
+                    root = nounMatch[0];
+                    isNumber = false;
+                }
+            } else if (numMatch) {
+                root = numMatch[0];
+                isNumber = true;
+            } else if (nounMatch) {
+                root = nounMatch[0];
+                isNumber = false;
             }
-        }
+            if (isNumber) isBaseTeen = baseTeenRegex.test(root);
+            return { root, isNumber, isBaseTeen };
+        };
 
-        if (root1) {
-            parsedLength += root1.length;
+        const r1 = getBestRoot(textToParse.substring(parsedLength));
+
+        if (r1.root) {
+            parsedLength += r1.root.length;
             if (parsedLength < textToParse.length) {
                 if (textToParse[parsedLength] === 'u') {
                     parsedLength += 1;
-                    let root2 = '';
-                    for (const root of nounRootsArray) {
-                        if (textToParse.startsWith(root, parsedLength)) {
-                            root2 = root;
-                            break;
-                        }
-                    }
-                    if (root2) {
-                        let afterRoot2Length = parsedLength + root2.length;
+                    const r2 = getBestRoot(textToParse.substring(parsedLength));
+                    
+                    if (r2.root) {
+                        let afterRoot2Length = parsedLength + r2.root.length;
                         if (afterRoot2Length < textToParse.length) {
-                            categoryFilter = ['Suffix', 'Primary Ending'];
+                            categoryFilter = r2.isNumber ? ['Number Suffix', 'Shared Suffix', 'Primary Ending'] : ['Suffix', 'Shared Suffix', 'Primary Ending'];
+                            if (r2.isBaseTeen) categoryFilter.push('Base Number Suffix');
                             searchTerm = textToParse.substring(afterRoot2Length);
                             fromPos = word.from + afterRoot2Length;
                         } else {
-                            categoryFilter = ['Noun/Number', 'Primary Ending'];
+                            categoryFilter = ['Noun/Number'];
                             searchTerm = textToParse.substring(parsedLength);
                             fromPos = word.from + parsedLength;
                         }
                     } else {
-                        categoryFilter = ['Noun/Number', 'Primary Ending'];
+                        categoryFilter = ['Noun/Number'];
                         searchTerm = textToParse.substring(parsedLength);
                         fromPos = word.from + parsedLength;
                     }
                 } else {
-                    categoryFilter = ['Suffix', 'Primary Ending'];
+                    categoryFilter = r1.isNumber ? ['Number Suffix', 'Shared Suffix', 'Primary Ending'] : ['Suffix', 'Shared Suffix', 'Primary Ending'];
+                    if (r1.isBaseTeen) categoryFilter.push('Base Number Suffix');
                     searchTerm = textToParse.substring(parsedLength);
                     fromPos = word.from + parsedLength;
                 }
