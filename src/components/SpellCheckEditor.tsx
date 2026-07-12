@@ -167,9 +167,10 @@ const SpellCheckEditor: React.FC<SpellCheckEditorProps> = ({ value, onChange, on
 
     const fuse = new Fuse(unifiedLexicon, { keys: ['word', 'eng'], includeScore: true, threshold: 0.1 });
 
-    const customAutocomplete = (context: CompletionContext, fuse: Fuse<KalobLexiconResult>) => {
+    const customAutocomplete = (context: CompletionContext, fuse: Fuse<KalobLexiconResult>, stripPrefix: boolean = false) => {
         const memoryTag = context.matchBefore(/!\d*/);
         if (memoryTag) {
+          if (stripPrefix) return null; // Don't duplicate memory results
           if (memoryTag.text === '!') {
             return {
               from: memoryTag.from,
@@ -202,17 +203,15 @@ const SpellCheckEditor: React.FC<SpellCheckEditorProps> = ({ value, onChange, on
           return null;
         }
 
-        let searchTerm = word.text;
-        let fromPos = word.from;
-        let categoryFilter: string[] | null = null;
-
         let textToParse = word.text;
         let parsedLength = 0;
 
-        if (/^[aeiouvw]/.test(textToParse)) {
-            parsedLength += 1;
-            searchTerm = textToParse.substring(1);
-            fromPos = word.from + 1;
+        if (stripPrefix) {
+            if (/^[aeiouvw]/.test(textToParse)) {
+                parsedLength += 1;
+            } else {
+                return null;
+            }
         }
 
         const getBestRoot = (text: string) => {
@@ -239,6 +238,10 @@ const SpellCheckEditor: React.FC<SpellCheckEditorProps> = ({ value, onChange, on
             if (isNumber) isBaseTeen = baseTeenRegex.test(root);
             return { root, isNumber, isBaseTeen };
         };
+
+        let searchTerm = textToParse.substring(parsedLength);
+        let fromPos = word.from + parsedLength;
+        let categoryFilter: string[] | null = null;
 
         const r1 = getBestRoot(textToParse.substring(parsedLength));
 
@@ -326,7 +329,10 @@ const SpellCheckEditor: React.FC<SpellCheckEditorProps> = ({ value, onChange, on
     ];
 
     if (autocomplete) {
-      extensions.push(autocompletion({ override: [(ctx) => customAutocomplete(ctx, fuse as unknown as Fuse<KalobLexiconResult>)] }));
+      extensions.push(autocompletion({ override: [
+          (ctx) => customAutocomplete(ctx, fuse as unknown as Fuse<KalobLexiconResult>, false),
+          (ctx) => customAutocomplete(ctx, fuse as unknown as Fuse<KalobLexiconResult>, true)
+      ] }));
     }
 
     const state = EditorState.create({
