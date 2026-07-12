@@ -209,8 +209,10 @@ const SpellCheckEditor: React.FC<SpellCheckEditorProps> = ({ value, onChange, on
         let textToParse = word.text;
         let parsedLength = 0;
 
-        if (textToParse.startsWith('u')) {
+        if (/^[aeiouvw]/.test(textToParse)) {
             parsedLength += 1;
+            searchTerm = textToParse.substring(1);
+            fromPos = word.from + 1;
         }
 
         const getBestRoot = (text: string) => {
