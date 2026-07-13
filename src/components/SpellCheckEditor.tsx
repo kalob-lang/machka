@@ -24,9 +24,47 @@ interface SpellCheckEditorProps {
   isDirty?: boolean;
 }
 
+const directionalConnectives: KalobLexiconResult[] = [
+  { word: 'ibi', eng: 'from above', cat: 'Connective', pos: 'Directional' },
+  { word: 'ibo', eng: 'over / passing above', cat: 'Connective', pos: 'Directional' },
+  { word: 'oiji', eng: 'from under', cat: 'Connective', pos: 'Directional' },
+  { word: 'ojho', eng: 'underneath / passing below', cat: 'Connective', pos: 'Directional' },
+  { word: 'ozhi', eng: 'from beyond', cat: 'Connective', pos: 'Directional' },
+  { word: 'ozho', eng: 'by beyond / passing beyond', cat: 'Connective', pos: 'Directional' },
+  { word: 'ighi', eng: 'from this side', cat: 'Connective', pos: 'Directional' },
+  { word: 'igho', eng: 'by this side / passing this side', cat: 'Connective', pos: 'Directional' },
+  { word: 'ogi', eng: 'from behind', cat: 'Connective', pos: 'Directional' },
+  { word: 'ogo', eng: 'by behind / passing behind', cat: 'Connective', pos: 'Directional' },
+  { word: 'iji', eng: 'from in front / from before', cat: 'Connective', pos: 'Directional' },
+  { word: 'ijo', eng: 'by the front / passing in front', cat: 'Connective', pos: 'Directional' },
+  { word: 'odi', eng: 'from outside', cat: 'Connective', pos: 'Directional' },
+  { word: 'odo', eng: 'by outside / passing outside', cat: 'Connective', pos: 'Directional' },
+  { word: 'ini', eng: 'from inside / out of', cat: 'Connective', pos: 'Directional' },
+  { word: 'ino', eng: 'through / by inside', cat: 'Connective', pos: 'Directional' },
+  { word: 'obi', eng: 'from up / from on high', cat: 'Connective', pos: 'Directional' },
+  { word: 'obo', eng: 'by up / via the top', cat: 'Connective', pos: 'Directional' },
+  { word: 'ibhi', eng: 'from down / from below', cat: 'Connective', pos: 'Directional' },
+  { word: 'ibho', eng: 'by down / via the bottom', cat: 'Connective', pos: 'Directional' },
+  { word: 'ijhi', eng: 'from against', cat: 'Connective', pos: 'Directional' },
+  { word: 'ijho', eng: 'by opposition / on the contrary', cat: 'Connective', pos: 'Directional' },
+  { word: 'izi', eng: 'from around', cat: 'Connective', pos: 'Directional' },
+  { word: 'izo', eng: 'by around / surrounding', cat: 'Connective', pos: 'Directional' },
+  { word: 'oji', eng: 'from near', cat: 'Connective', pos: 'Directional' },
+  { word: 'ojo', eng: 'by near / juxtaposed', cat: 'Connective', pos: 'Directional' },
+  { word: 'imi', eng: 'from such past date', cat: 'Connective', pos: 'Directional' },
+  { word: 'imo', eng: 'by such future date', cat: 'Connective', pos: 'Directional' },
+  { word: 'oni', eng: 'from since / from that instant', cat: 'Connective', pos: 'Directional' },
+  { word: 'ono', eng: 'starting from / by since', cat: 'Connective', pos: 'Directional' },
+  { word: 'ozi', eng: 'from after / subsequently / later', cat: 'Connective', pos: 'Directional' },
+  { word: 'ozo', eng: 'much later / by after', cat: 'Connective', pos: 'Directional' },
+];
+
 const nounRootsArray = lexiconData.filter(w => w.cat === 'Noun/Number').map(w => w.word.toLowerCase()).sort((a,b) => b.length - a.length);
 const strictNounRootsArray = lexiconData.filter(w => w.cat === 'Noun/Number' && w.pos !== 'Numeral').map(w => w.word.toLowerCase()).sort((a,b) => b.length - a.length);
-const allRoots = new Set(lexiconData.map(w => w.word.toLowerCase()));
+const allRoots = new Set([
+  ...lexiconData.map(w => w.word.toLowerCase()),
+  ...directionalConnectives.map(c => c.word.toLowerCase())
+]);
 const suffixesArray = commonSuffixes.map(s => s.suffix.toLowerCase()).sort((a,b) => b.length - a.length);
 
 const nonZeroDigit = 'phwn|tvbh|threz|qad|phabh|sigz|sebd|khogd|nobh';
@@ -106,6 +144,7 @@ const SpellCheckEditor: React.FC<SpellCheckEditorProps> = ({ value, onChange, on
     const unifiedLexicon = [
       ...lexiconData,
       ...generatedNumbers,
+      ...directionalConnectives,
       ...commonSuffixes.map(s => ({
         word: s.suffix,
         eng: s.desc,
