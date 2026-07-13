@@ -55,8 +55,15 @@ const numRegex = new RegExp(`^${numberEntity}`);
 const nounRegex = new RegExp(`^${nounPattern}`);
 const baseTeenRegex = new RegExp(`^(?:${nonZeroDigit}|${teens})$`);
 
+const letterNames = new Set([
+  'a', 'bx', 'bhx', 'cx', 'chx', 'dx', 'dhx', 'e', 'gx', 'ghx', 'i', 
+  'jx', 'jhx', 'kx', 'khx', 'lx', 'mx', 'nx', 'o', 'px', 'phx', 'qx', 
+  'qhx', 'rx', 'sx', 'shx', 'tx', 'thx', 'u', 'v', 'w', 'x', 'yx', 'zx', 'zhx'
+]);
+
 function checkSpelling(word: string): boolean {
     const lowerWord = word.toLowerCase();
+    if (letterNames.has(lowerWord)) return true;
     if (allRoots.has(lowerWord)) return true;
     if (compoundRegex.test(lowerWord)) return true;
     return false;
