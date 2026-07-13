@@ -57,8 +57,22 @@ const App: React.FC = () => {
     const storedWidth = localStorage.getItem('sidebarWidth');
     return storedWidth ? parseInt(storedWidth, 10) : 300;
   });
-  const [sources, setSources] = useState<Source[]>([]);
-  const [selectedSource, setSelectedSource] = useState<Source | null>(null);
+  const [sources, setSources] = useState<Source[]>(() => {
+    const stored = localStorage.getItem('sources');
+    return stored ? JSON.parse(stored) : [];
+  });
+  const [selectedSource, setSelectedSource] = useState<Source | null>(() => {
+    const params = new URLSearchParams(window.location.search);
+    const sourceId = params.get('source');
+    if (sourceId) {
+      const stored = localStorage.getItem('sources');
+      if (stored) {
+        const parsed = JSON.parse(stored) as Source[];
+        return parsed.find(s => s.id === sourceId) || null;
+      }
+    }
+    return null;
+  });
   const [showAddSourceModal, setShowAddSourceModal] = useState(false);
   const [isScreenTooSmall, setIsScreenTooSmall] = useState(window.innerWidth < 800);
   const [sourceFilter, setSourceFilter] = useState(() => localStorage.getItem('sourceFilter') || '');
@@ -68,7 +82,10 @@ const App: React.FC = () => {
   const [memoryVersion, setMemoryVersion] = useState(0);
   const [expandedOutlines, setExpandedOutlines] = useState<Record<string, boolean>>({});
   const [scrollToSegment, setScrollToSegment] = useState<{ sourceId: string; segmentIndex: number; } | null>(null);
-  const [activeTab, setActiveTab] = useState('source');
+  const [activeTab, setActiveTab] = useState(() => {
+    const params = new URLSearchParams(window.location.search);
+    return params.get('tab') || 'source';
+  });
   const [showSourcePreview, setShowSourcePreview] = useState(false);
   const [scrollToPreviewForSource, setScrollToPreviewForSource] = useState<string | null>(null);
   const [isDirty, setIsDirty] = useState(false);
@@ -113,11 +130,38 @@ const App: React.FC = () => {
   }, []);
 
   useEffect(() => {
-    const storedSources = localStorage.getItem('sources');
-    if (storedSources) {
-      setSources(JSON.parse(storedSources));
+    const params = new URLSearchParams(window.location.search);
+    let changed = false;
+
+    if (selectedSource) {
+      if (params.get('source') !== selectedSource.id) {
+        params.set('source', selectedSource.id);
+        changed = true;
+      }
+    } else {
+      if (params.has('source')) {
+        params.delete('source');
+        changed = true;
+      }
     }
-  }, []);
+
+    if (activeTab !== 'source') {
+      if (params.get('tab') !== activeTab) {
+        params.set('tab', activeTab);
+        changed = true;
+      }
+    } else {
+      if (params.has('tab')) {
+        params.delete('tab');
+        changed = true;
+      }
+    }
+
+    if (changed) {
+      const newUrl = `${window.location.pathname}${params.toString() ? '?' + params.toString() : ''}${window.location.hash}`;
+      window.history.replaceState({}, '', newUrl);
+    }
+  }, [selectedSource, activeTab]);
 
   useEffect(() => {
     const baseTitle = "uywng Machka";
