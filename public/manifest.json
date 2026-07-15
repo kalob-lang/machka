@@ -8,38 +8,53 @@
       "type": "image/x-icon"
     },
     {
-      "src": "mocko-icon_48.png",
+      "src": "kalob_machka_48.png",
       "type": "image/png",
       "sizes": "48x48"
     },
     {
-      "src": "mocko-icon_72.png",
+      "src": "kalob_machka_72.png",
       "type": "image/png",
       "sizes": "72x72"
     },
     {
-      "src": "mocko-icon_192.png",
+      "src": "kalob_machka_128.png",
+      "type": "image/png",
+      "sizes": "128x128"
+    },
+    {
+      "src": "kalob_machka_192.png",
       "type": "image/png",
       "sizes": "192x192"
     },
     {
-      "src": "mocko-icon_384.png",
+      "src": "kalob_machka_256.png",
+      "type": "image/png",
+      "sizes": "256x256"
+    },
+    {
+      "src": "kalob_machka_384.png",
       "type": "image/png",
       "sizes": "384x384"
     },
     {
-      "src": "mocko-icon_512.png",
+      "src": "kalob_machka_512.png",
       "type": "image/png",
       "sizes": "512x512"
     },
     {
-      "src": "mocko-icon.png",
+      "src": "kalob_machka_800.png",
       "type": "image/png",
       "sizes": "800x800"
+    },
+    {
+      "src": "kalob_machka_1024.png",
+      "type": "image/png",
+      "sizes": "1024x1024"
     }
   ],
   "start_url": ".",
   "display": "standalone",
-  "theme_color": "#000000",
-  "background_color": "#ffffff"
+  "theme_color": "#1b4e87",
+  "background_color": "#89c5e7"
 }
