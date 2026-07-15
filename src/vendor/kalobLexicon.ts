@@ -1575,7 +1575,7 @@ export const lexiconData = [
     "word": "khozh",
     "cat": "Modificative",
     "pos": "Adverb",
-    "eng": "hardly"
+    "eng": "hardly / barely"
   },
   {
     "word": "klezh",
