@@ -1,6 +1,12 @@
 import React, { useState } from 'react';
-import { Button, Form, Stack } from 'react-bootstrap';
+import { Button, Form, Stack, Dropdown, Badge } from 'react-bootstrap';
 import { useApp } from '../AppContext';
+
+export interface Occurrence {
+  segmentIndex: number;
+  text: string;
+  isTranslated: boolean;
+}
 
 interface SelectionTooltipProps {
   x: number;
@@ -10,9 +16,11 @@ interface SelectionTooltipProps {
   onSaveMemory: (target: string) => void;
   onWiktionarySearch: (term: string) => void;
   isAddingMemory: boolean;
+  occurrences?: Occurrence[];
+  onNavigate?: (index: number) => void;
 }
 
-const SelectionTooltip = React.forwardRef<HTMLDivElement, SelectionTooltipProps>(({ x, y, text, onAddMemory, onSaveMemory, onWiktionarySearch, isAddingMemory }, ref) => {
+const SelectionTooltip = React.forwardRef<HTMLDivElement, SelectionTooltipProps>(({ x, y, text, onAddMemory, onSaveMemory, onWiktionarySearch, isAddingMemory, occurrences = [], onNavigate }, ref) => {
   const [target, setTarget] = useState('');
   const { wiktionarySearch } = useApp();
 
@@ -51,6 +59,20 @@ const SelectionTooltip = React.forwardRef<HTMLDivElement, SelectionTooltipProps>
       <Stack direction='horizontal' gap={1}>
         <Button size="sm" onClick={onAddMemory}>Add Memory</Button>
         <Button size="sm" variant='info' onClick={handleWiktionarySearch}>Search Wiktionary</Button>
+        <Dropdown>
+          <Dropdown.Toggle size="sm" variant="warning" disabled={occurrences.length === 0} id="dropdown-occurrences">
+            🔍 <Badge bg="light" text="dark">{occurrences.length}</Badge>
+          </Dropdown.Toggle>
+          <Dropdown.Menu style={{ maxHeight: '200px', overflowY: 'auto' }}>
+            {occurrences.map((occ) => (
+              <Dropdown.Item key={occ.segmentIndex} onClick={() => onNavigate && onNavigate(occ.segmentIndex)}>
+                <span className="me-2 text-muted">#{occ.segmentIndex + 1}</span>
+                <span>{occ.text.length > 30 ? occ.text.substring(0, 30) + '...' : occ.text}</span>
+                {occ.isTranslated && <span className="ms-2" title="Translated">📝</span>}
+              </Dropdown.Item>
+            ))}
+          </Dropdown.Menu>
+        </Dropdown>
       </Stack>
     </div>
   );

@@ -11,7 +11,7 @@ import { useIntersectionObserver } from '../hooks/useIntersectionObserver';
 import SplitSourceModal from './SplitSourceModal';
 import pako from 'pako';
 import UnderlinedText from './UnderlinedText';
-import SelectionTooltip from './SelectionTooltip';
+import SelectionTooltip, { Occurrence } from './SelectionTooltip';
 import ModeHelpAlert from './ModeHelpAlert';
 import ScrollToButtons from './ScrollToButtons';
 
@@ -78,7 +78,7 @@ const TranslationEditor: React.FC<TranslationEditorProps> = ({ onSplit, onTransl
   const [showBookmarkPopover, setShowBookmarkPopover] = useState(false);
   const [notePopoverPlacement, setNotePopoverPlacement] = useState<Placement>('top');
   const [bookmarkPopoverPlacement, setBookmarkPopoverPlacement] = useState<Placement>('top');
-
+  const [autoSelectText, setAutoSelectText] = useState<{ segmentIndex: number; text: string } | null>(null);
 
   const [segmentType, setSegmentType] = useState<SegmentType>('Body');
   const [outlineLevel, setOutlineLevel] = useState<OutlineLevel>('Level 2');
@@ -196,6 +196,58 @@ const TranslationEditor: React.FC<TranslationEditorProps> = ({ onSplit, onTransl
       setVisibleSegmentCount(prevCount => prevCount + 50);
     }
   }, [isIntersecting]);
+
+  useEffect(() => {
+    if (autoSelectText && editingSegment && validSegments.indexOf(editingSegment) === autoSelectText.segmentIndex) {
+      const timer = setTimeout(() => {
+        const sourceTextElement = document.getElementById('current-editing-translation-source-text');
+        if (sourceTextElement) {
+          const findTextNode = (node: Node, text: string): { node: Node, offset: number } | null => {
+            if (node.nodeType === Node.TEXT_NODE) {
+              const idx = node.textContent?.indexOf(text);
+              if (idx !== undefined && idx !== -1) {
+                return { node, offset: idx };
+              }
+            } else {
+              for (const child of Array.from(node.childNodes)) {
+                const res = findTextNode(child, text);
+                if (res) return res;
+              }
+            }
+            return null;
+          };
+          
+          const match = findTextNode(sourceTextElement, autoSelectText.text);
+          if (match) {
+            const range = document.createRange();
+            range.setStart(match.node, match.offset);
+            range.setEnd(match.node, match.offset + autoSelectText.text.length);
+            const selection = window.getSelection();
+            if (selection) {
+              // Blur the active element (e.g., CodeMirror) so it doesn't immediately steal the selection back
+              if (document.activeElement instanceof HTMLElement) {
+                document.activeElement.blur();
+              }
+              selection.removeAllRanges();
+              selection.addRange(range);
+              // Calculate position relative to editorRef
+              const rect = range.getBoundingClientRect();
+              const editorRect = editorRef.current?.getBoundingClientRect();
+              if (editorRect) {
+                setTooltip({ 
+                  x: rect.left - editorRect.left, 
+                  y: rect.top - editorRect.top - 45, 
+                  text: autoSelectText.text 
+                });
+              }
+            }
+          }
+        }
+        setAutoSelectText(null);
+      }, 400); // Wait 400ms for Mark.js to finish replacing DOM nodes
+      return () => clearTimeout(timer);
+    }
+  }, [autoSelectText, editingSegment, validSegments]);
 
   useEffect(() => {
     if (scrollToSegment && source && scrollToSegment.sourceId === source.id) {
@@ -456,10 +508,61 @@ const TranslationEditor: React.FC<TranslationEditorProps> = ({ onSplit, onTransl
       && (isSelectionInSelector(selection, '.source-text') || isSelectionInSelector(selection, '#current-editing-translation-source-text'))) {
       const range = selection.getRangeAt(0);
       const rect = range.getBoundingClientRect();
-      setTooltip({ x: rect.left, y: rect.top - 30, text: selection.toString() });
+      const editorRect = editorRef.current?.getBoundingClientRect();
+      if (editorRect) {
+        setTooltip({ 
+          x: rect.left - editorRect.left, 
+          y: rect.top - editorRect.top - 45, 
+          text: selection.toString() 
+        });
+      }
     } else {
       setTooltip(null);
     }
+  };
+
+  const occurrences = useMemo(() => {
+    if (!tooltip || !tooltip.text) return [];
+    const lowerText = tooltip.text.toLowerCase();
+    const result: Occurrence[] = [];
+    validSegments.forEach((segment, index) => {
+      // Find segments that contain the selected text
+      // We'll exclude the current editing segment since that's where they likely are right now,
+      // or we can just include it but it's redundant. We'll include it unless it's the exact editing segment.
+      if (editingSegment === segment) return;
+      
+      if (segment.toLowerCase().includes(lowerText)) {
+        const translationData = translations[segment];
+        const isTranslated = typeof translationData === 'object' && translationData !== null 
+          ? !!translationData.text && translationData.segmentType !== 'Skip'
+          : !!translationData;
+        result.push({ segmentIndex: index, text: segment, isTranslated });
+      }
+    });
+    return result;
+  }, [tooltip, validSegments, translations, editingSegment]);
+
+  const handleNavigateWithSelection = (index: number, textToSelect: string) => {
+    // Hide the tooltip during scroll/navigation so it doesn't jump around
+    setTooltip(null);
+
+    if (index >= visibleSegmentCount) {
+      setVisibleSegmentCount(index + 50);
+    }
+    
+    setAutoSelectText({ segmentIndex: index, text: textToSelect });
+
+    setTimeout(() => {
+      const element = document.getElementById(`segment-item-${index}`);
+      if (element) {
+        element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        element.classList.add('highlight-scroll');
+        setTimeout(() => {
+          element.classList.remove('highlight-scroll');
+        }, 1500);
+      }
+      handleEdit(validSegments[index]);
+    }, 0);
   };
 
   const handleAddMemory = () => {
@@ -751,7 +854,7 @@ const TranslationEditor: React.FC<TranslationEditorProps> = ({ onSplit, onTransl
   };
 
   return (
-    <div ref={editorRef} onMouseUp={handleMouseUp}>
+    <div ref={editorRef} onMouseUp={handleMouseUp} style={{ position: 'relative' }}>
       {tooltip && (
         <SelectionTooltip 
           ref={tooltipRef}
@@ -762,6 +865,8 @@ const TranslationEditor: React.FC<TranslationEditorProps> = ({ onSplit, onTransl
           onSaveMemory={handleSaveMemory}
           onWiktionarySearch={handleWiktionarySearch}
           isAddingMemory={isAddingMemory}
+          occurrences={occurrences}
+          onNavigate={(index) => handleNavigateWithSelection(index, tooltip.text)}
         />
       )}
       <WiktionaryModal show={showWiktionaryModal} onHide={() => setShowWiktionaryModal(false)} term={wiktionaryTerm} />
