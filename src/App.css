@@ -134,6 +134,12 @@ html, body, #root {
   margin-top: 1em !important;
 }
 
+[data-theme="spacelab"] div#sidebar-wrapper .bg-info.text-bg-info a {
+  color: var(--bs-light)
+}
+[data-theme="spacelab"] div#sidebar-wrapper .bg-info.text-bg-info a:hover {
+  color: var(--bs-critical)
+}
 
 /* This is needed because of the longer content in the icons below */
 .cm-completionIcon {
