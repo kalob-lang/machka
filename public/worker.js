@@ -123,6 +123,11 @@ self.onmessage = (e) => {
           }
         }
 
+        // Strip zero-width spaces used for segment disconnects
+        if (typeof translationText === 'string') {
+          translationText = translationText.replace(/\u200B/g, '');
+        }
+
         if (format === 'html' && translationData?.segmentType === 'Heading') {
           flushHtmlParagraphBuffer();
           const level = translationData.outlineLevel?.replace('Level ', '') || '2';

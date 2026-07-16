@@ -763,7 +763,7 @@ const App: React.FC = () => {
                         />
                       </Tab.Pane>
                       <Tab.Pane eventKey="translation">
-                        <TranslationEditor onSplit={handleSplitSource} onTranslationsUpdate={handleTranslationsUpdate} onMemoryUpdate={handleMemoryUpdate} memoryVersion={memoryVersion} scrollToSegment={scrollToSegment} onScrollToSegmentHandled={() => setScrollToSegment(null)} isDirty={isDirty} setIsDirty={setIsDirty} />
+                        <TranslationEditor onSplit={handleSplitSource} onTranslationsUpdate={handleTranslationsUpdate} onMemoryUpdate={handleMemoryUpdate} memoryVersion={memoryVersion} scrollToSegment={scrollToSegment} onScrollToSegmentHandled={() => setScrollToSegment(null)} isDirty={isDirty} setIsDirty={setIsDirty} onSourceUpdate={handleSourceUpdate} />
                       </Tab.Pane>
                       <Tab.Pane eventKey="memory">
                         <MemoryEditor 

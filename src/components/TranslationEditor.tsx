@@ -39,6 +39,7 @@ interface TranslationEditorProps {
   onScrollToSegmentHandled: () => void;
   isDirty: boolean;
   setIsDirty: (isDirty: boolean) => void;
+  onSourceUpdate: (updatedSource: Source) => void;
 }
 
 function isSelectionInSelector(selection: Selection, selector: string): boolean {
@@ -52,12 +53,13 @@ function isSelectionInSelector(selection: Selection, selector: string): boolean 
   return false;
 }
 
-const TranslationEditor: React.FC<TranslationEditorProps> = ({ onSplit, onTranslationsUpdate, onMemoryUpdate, memoryVersion, scrollToSegment, onScrollToSegmentHandled, isDirty, setIsDirty }) => {
+const TranslationEditor: React.FC<TranslationEditorProps> = ({ onSplit, onTranslationsUpdate, onMemoryUpdate, memoryVersion, scrollToSegment, onScrollToSegmentHandled, isDirty, setIsDirty, onSourceUpdate }) => {
   const { source, segments, delimiters } = useSource();
   const { spellCheck, handleSetItem, setError, scrollingReturnButtonsEnabled, scrollingReturnButtonsSensitivity } = useApp();
 
   const [translations, setTranslations] = useState<Record<string, any>>({});
   const [editingSegment, setEditingSegment] = useState<string | null>(null);
+  const [editingSegmentIndex, setEditingSegmentIndex] = useState<number | null>(null);
   const [currentTranslation, setCurrentTranslation] = useState('');
   const [currentNote, setCurrentNote] = useState('');
   const [currentBookmark, setCurrentBookmark] = useState<{ name: string; comment: string } | null>(null);
@@ -93,8 +95,19 @@ const TranslationEditor: React.FC<TranslationEditorProps> = ({ onSplit, onTransl
 
   const editorRef = useRef<HTMLDivElement>(null);
   const tooltipRef = useRef<HTMLDivElement>(null);
+  const previousSourceIdRef = useRef<string | null>(null);
 
   const validSegments = useMemo(() => segments.map(s => s.trim()).filter(Boolean), [segments]);
+
+  const validToOriginalIndexMap = useMemo(() => {
+    const map: number[] = [];
+    segments.forEach((seg, originalIndex) => {
+      if (seg.trim()) {
+        map.push(originalIndex);
+      }
+    });
+    return map;
+  }, [segments]);
 
   const { ref: sentinelRef, isIntersecting } = useIntersectionObserver({ threshold: 0.1 });
 
@@ -252,6 +265,7 @@ const TranslationEditor: React.FC<TranslationEditorProps> = ({ onSplit, onTransl
   useEffect(() => {
     if (scrollToSegment && source && scrollToSegment.sourceId === source.id) {
       setEditingSegment(null);
+      setEditingSegmentIndex(null);
       const index = scrollToSegment.segmentIndex;
       if (index >= 0 && index < validSegments.length) {
         if (index >= visibleSegmentCount) {
@@ -273,6 +287,7 @@ const TranslationEditor: React.FC<TranslationEditorProps> = ({ onSplit, onTransl
 
     if (scrollToIndex !== null) {
       setEditingSegment(null);
+      setEditingSegmentIndex(null);
       if (scrollToIndex >= 0 && scrollToIndex < validSegments.length) {
         if (scrollToIndex >= visibleSegmentCount) {
           setVisibleSegmentCount(scrollToIndex + 50);
@@ -307,7 +322,11 @@ const TranslationEditor: React.FC<TranslationEditorProps> = ({ onSplit, onTransl
 
   useEffect(() => {
     if (source) {
-      setEditingSegment(null);
+      if (previousSourceIdRef.current !== source.id) {
+        setEditingSegment(null);
+        setEditingSegmentIndex(null);
+        previousSourceIdRef.current = source.id;
+      }
       let mems = {};
       const rawMemories = localStorage.getItem(`memories_${source.id}`);
       if (rawMemories) {
@@ -364,7 +383,7 @@ const TranslationEditor: React.FC<TranslationEditorProps> = ({ onSplit, onTransl
     };
   }, [tooltipRef, isAddingMemory]);
 
-  const handleEdit = (segment: string) => {
+  const handleEdit = (segment: string, index?: number) => {
     const scrollContainer = document.querySelector('#page-content-wrapper');
     if (scrollContainer) {
         setInitialScrollTop(scrollContainer.scrollTop);
@@ -372,6 +391,11 @@ const TranslationEditor: React.FC<TranslationEditorProps> = ({ onSplit, onTransl
 
     const trimmedSegment = segment.trim();
     setEditingSegment(trimmedSegment);
+    if (index !== undefined) {
+      setEditingSegmentIndex(index);
+    } else {
+      setEditingSegmentIndex(validSegments.indexOf(trimmedSegment));
+    }
     const translationData = translations[trimmedSegment];
     
     let initialState = {};
@@ -444,6 +468,7 @@ const TranslationEditor: React.FC<TranslationEditorProps> = ({ onSplit, onTransl
         setTranslations(updatedTranslations);
         onTranslationsUpdate();
         setEditingSegment(null);
+        setEditingSegmentIndex(null);
         setInitialScrollTop(null);
         setIsDirty(false);
       }
@@ -471,12 +496,13 @@ const TranslationEditor: React.FC<TranslationEditorProps> = ({ onSplit, onTransl
         setTranslations(updatedTranslations);
         onTranslationsUpdate();
         setIsDirty(false);
-        const currentIndex = validSegments.indexOf(currentSegmentTrimmed);
+        const currentIndex = editingSegmentIndex !== null ? editingSegmentIndex : validSegments.indexOf(currentSegmentTrimmed);
         if (currentIndex < validSegments.length - 1) {
           const nextSegmentToEdit = validSegments[currentIndex + 1];
-          handleEdit(nextSegmentToEdit);
+          handleEdit(nextSegmentToEdit, currentIndex + 1);
         } else {
           setEditingSegment(null);
+          setEditingSegmentIndex(null);
           setInitialScrollTop(null);
         }
       }
@@ -485,8 +511,53 @@ const TranslationEditor: React.FC<TranslationEditorProps> = ({ onSplit, onTransl
 
   const handleCancel = () => {
     setEditingSegment(null);
+    setEditingSegmentIndex(null);
     setInitialScrollTop(null);
     setIsDirty(false);
+  };
+
+  const handleDisconnect = (segment: string, validIndex: number) => {
+    if (!source) return;
+    
+    const originalIndex = validToOriginalIndexMap[validIndex];
+    let newContent = '';
+    for (let i = 0; i < segments.length; i++) {
+      if (i === originalIndex) {
+        newContent += segments[i] + '\u200B';
+      } else {
+        newContent += segments[i];
+      }
+      if (i < delimiters.length) {
+        newContent += delimiters[i];
+      }
+    }
+
+    let finalContent = newContent;
+    if (source.compression) {
+      try {
+        finalContent = btoa(String.fromCharCode(...pako.deflate(newContent, { level: source.compressionLevel })));
+      } catch (err: any) {
+        setError({ title: 'Compression Error', message: `Failed to compress source content during disconnect: ${err.message}` });
+        return;
+      }
+    }
+
+    const updatedSource = {
+      ...source,
+      content: finalContent
+    };
+    onSourceUpdate(updatedSource);
+
+    const newSegment = segment + '\u200B';
+    const updatedTranslations = { ...translations };
+    updatedTranslations[newSegment.trim()] = { ...translations[segment.trim()] };
+    
+    if (saveData(`translations_${source.id}`, updatedTranslations)) {
+      setTranslations(updatedTranslations);
+      onTranslationsUpdate();
+    }
+
+    handleEdit(newSegment, validIndex);
   };
 
   const handleTitleSave = () => {
@@ -561,7 +632,7 @@ const TranslationEditor: React.FC<TranslationEditorProps> = ({ onSplit, onTransl
           element.classList.remove('highlight-scroll');
         }, 1500);
       }
-      handleEdit(validSegments[index]);
+      handleEdit(validSegments[index], index);
     }, 0);
   };
 
@@ -933,11 +1004,45 @@ const TranslationEditor: React.FC<TranslationEditorProps> = ({ onSplit, onTransl
             const noteText = translationData?.note;
             const bookmarkData = translationData?.bookmark;
             const segType = translationData?.segmentType || 'Body';
-            const delimiter = delimiters[index]?.replaceAll('\n', '⏎')
+            const delimiter = delimiters[index]?.replaceAll('\n', '⏎');
+            const isFirstOccurrence = validSegments.indexOf(segment) === index;
             
             return (
               <ListGroup.Item key={index} id={`segment-item-${index}`} className={`d-flex align-items-center ${segType === 'Skip' ? 'list-group-item-light' : ''}`}>
-                  {editingSegment === segment ? (
+                  {editingSegmentIndex === index ? (
+                    !isFirstOccurrence ? (
+                      <div className="w-100">
+                        {renderSegmentContent(segment, translationData, delimiter)}
+                        <Stack direction='horizontal' gap={1} className="mt-2">
+                          <Button variant="success" size="sm" onClick={() => {
+                            handleCancel();
+                            if (index < validSegments.length - 1) {
+                              handleEdit(validSegments[index + 1], index + 1);
+                            }
+                          }} title="Skip to the next segment for editing">Edit next</Button>
+                          <Button variant="primary" size="sm" className="ml-2" onClick={() => {
+                            handleCancel();
+                            const firstIndex = validSegments.indexOf(segment);
+                            if (firstIndex >= visibleSegmentCount) {
+                              setVisibleSegmentCount(firstIndex + 50);
+                            }
+                            setTimeout(() => {
+                              const element = document.getElementById(`segment-item-${firstIndex}`);
+                              if (element) {
+                                element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                                element.classList.add('highlight-scroll');
+                                setTimeout(() => {
+                                  element.classList.remove('highlight-scroll');
+                                }, 1500);
+                              }
+                              handleEdit(validSegments[firstIndex], firstIndex);
+                            }, 0);
+                          }} title="Navigate to editable main segment for this duplicate">Edit this</Button>
+                          <Button variant="warning" size="sm" className="ml-2" onClick={() => handleDisconnect(segment, index)} title="Disconnect duplicate segment">Disconnect</Button>
+                          <Button variant="secondary" size="sm" className="ml-2" onClick={handleCancel}>Cancel</Button>
+                        </Stack>
+                      </div>
+                    ) : (
                     <div className="w-100">
                       <UnderlinedText text={segment} memories={memories} onInsert={handleInsertMemory} onMemoriesNumbered={onMemoriesNumbered} memoryVersion={memoryVersion} />
                       {getDelimiterBadge(delimiter)}
@@ -945,7 +1050,7 @@ const TranslationEditor: React.FC<TranslationEditorProps> = ({ onSplit, onTransl
                         value={currentTranslation} 
                         onChange={setCurrentTranslation} 
                         onDiagnosticsChange={setDiagnostics}
-                        autofocus={editingSegment === segment}
+                        autofocus={editingSegmentIndex === index}
                         numberedMemories={numberedMemories}
                         isDirty={isDirty}
                         />
@@ -965,13 +1070,14 @@ const TranslationEditor: React.FC<TranslationEditorProps> = ({ onSplit, onTransl
                         </OverlayTrigger>
                       </Stack>
                     </div>
+                    )
                   ) : (
                     <div className="d-flex justify-content-between align-items-center w-100">
                       {renderSegmentContent(segment, translationData, delimiter)}
                       <Stack direction='horizontal'>
                         {noteText && <span title={`Note: ${noteText}`} style={{ paddingRight: '1em' }}>🗒️</span>}
                         {bookmarkData && <span title={`${bookmarkData.name}${bookmarkData.comment ? `:\n${bookmarkData.comment}` : ''}`} style={{ paddingRight: '1em' }}>🔖</span>}
-                        <Button variant="link" title='Edit segment' onClick={() => handleEdit(segment)} style={{textDecoration: 'none'}}>✏️</Button>
+                        <Button variant="link" title='Edit segment' onClick={() => handleEdit(segment, index)} style={{textDecoration: 'none'}}>✏️</Button>
                       </Stack>
                     </div>
                   )}
