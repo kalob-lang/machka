@@ -22,6 +22,8 @@ interface MemoryEditorProps {
   onSourceUpdate: (updatedSource: Source) => void;
   onMemoryUpdate: () => void;
   onNavigateToSegment: (segmentIndex: number) => void;
+  scrollToMemory?: string | null;
+  onScrollToMemoryHandled?: () => void;
 }
 
 interface ImportedMemory {
@@ -41,7 +43,7 @@ interface ProcessedMemory {
   usage: Usage[];
 }
 
-const MemoryEditor: React.FC<MemoryEditorProps> = ({ allSources, memoryVersion, onSourceUpdate, onMemoryUpdate, onNavigateToSegment }) => {
+const MemoryEditor: React.FC<MemoryEditorProps> = ({ allSources, memoryVersion, onSourceUpdate, onMemoryUpdate, onNavigateToSegment, scrollToMemory, onScrollToMemoryHandled }) => {
   const { source, segments } = useSource();
   const { handleSetItem, setError } = useApp();
 
@@ -107,7 +109,6 @@ const MemoryEditor: React.FC<MemoryEditorProps> = ({ allSources, memoryVersion, 
     });
     setImportedMemories(allImported);
   }, [importSources, allSources]);
-
   const saveData = (key: string, data: any) => {
     if (!source) return false;
     const stringified = JSON.stringify(data);
@@ -238,6 +239,22 @@ const MemoryEditor: React.FC<MemoryEditorProps> = ({ allSources, memoryVersion, 
     return processed;
   }, [memories, importedMemories, segments]);
 
+  useEffect(() => {
+    if (scrollToMemory) {
+      setTimeout(() => {
+        const element = document.getElementById(`memory-card-${scrollToMemory}`);
+        if (element) {
+          element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          element.classList.add('highlight-scroll');
+          setTimeout(() => {
+            element.classList.remove('highlight-scroll');
+          }, 1500);
+          onScrollToMemoryHandled?.();
+        }
+      }, 0);
+    }
+  }, [scrollToMemory, finalMemories, onScrollToMemoryHandled]);
+
   const { available, missing } = useMemo(() => {
     const available = allSources.filter(s => s.id !== source?.id);
     const missing = (source?.memoryImports || []).filter(imp => !allSources.some(s => s.id === imp.id));
@@ -303,7 +320,7 @@ const MemoryEditor: React.FC<MemoryEditorProps> = ({ allSources, memoryVersion, 
       <div className="mt-4">
         <ModeHelpAlert mode="memory" />
         {Object.entries(finalMemories).map(([sourceText, mem]) => (
-          <Card key={sourceText} className="mb-2">
+          <Card key={sourceText} id={`memory-card-${sourceText}`} className="mb-2">
             {mem.sourceTitle && <Card.Header>{mem.sourceTitle}</Card.Header>}
             <Card.Body>
               <Card.Title>

@@ -82,6 +82,7 @@ const App: React.FC = () => {
   const [memoryVersion, setMemoryVersion] = useState(0);
   const [expandedOutlines, setExpandedOutlines] = useState<Record<string, boolean>>({});
   const [scrollToSegment, setScrollToSegment] = useState<{ sourceId: string; segmentIndex: number; } | null>(null);
+  const [scrollToMemory, setScrollToMemory] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState(() => {
     const params = new URLSearchParams(window.location.search);
     return params.get('tab') || 'source';
@@ -539,6 +540,13 @@ const App: React.FC = () => {
     });
   };
 
+  const handleNavigateToMemoryTab = (memoryKey: string) => {
+    confirmAndProceed(() => {
+      setActiveTab('memory');
+      setScrollToMemory(memoryKey);
+    });
+  };
+
   const toggleOutline = (sourceId: string) => {
     setExpandedOutlines(prev => ({ ...prev, [sourceId]: !prev[sourceId] }));
   };
@@ -763,7 +771,7 @@ const App: React.FC = () => {
                         />
                       </Tab.Pane>
                       <Tab.Pane eventKey="translation">
-                        <TranslationEditor onSplit={handleSplitSource} onTranslationsUpdate={handleTranslationsUpdate} onMemoryUpdate={handleMemoryUpdate} memoryVersion={memoryVersion} scrollToSegment={scrollToSegment} onScrollToSegmentHandled={() => setScrollToSegment(null)} isDirty={isDirty} setIsDirty={setIsDirty} onSourceUpdate={handleSourceUpdate} />
+                        <TranslationEditor onSplit={handleSplitSource} onTranslationsUpdate={handleTranslationsUpdate} onMemoryUpdate={handleMemoryUpdate} memoryVersion={memoryVersion} scrollToSegment={scrollToSegment} onScrollToSegmentHandled={() => setScrollToSegment(null)} isDirty={isDirty} setIsDirty={setIsDirty} onSourceUpdate={handleSourceUpdate} onNavigateToMemoryTab={handleNavigateToMemoryTab} />
                       </Tab.Pane>
                       <Tab.Pane eventKey="memory">
                         <MemoryEditor 
@@ -776,6 +784,8 @@ const App: React.FC = () => {
                               handleNavigateToSegment(selectedSource.id, segmentIndex);
                             }
                           }}
+                          scrollToMemory={scrollToMemory}
+                          onScrollToMemoryHandled={() => setScrollToMemory(null)}
                         />
                       </Tab.Pane>
                     <Tab.Pane eventKey="settings">

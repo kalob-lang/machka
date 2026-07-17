@@ -18,9 +18,12 @@ interface SelectionTooltipProps {
   isAddingMemory: boolean;
   occurrences?: Occurrence[];
   onNavigate?: (index: number) => void;
+  existingMemoryTarget?: string;
+  onGoToMemory?: () => void;
+  onInsertMemory?: () => void;
 }
 
-const SelectionTooltip = React.forwardRef<HTMLDivElement, SelectionTooltipProps>(({ x, y, text, onAddMemory, onSaveMemory, onWiktionarySearch, isAddingMemory, occurrences = [], onNavigate }, ref) => {
+const SelectionTooltip = React.forwardRef<HTMLDivElement, SelectionTooltipProps>(({ x, y, text, onAddMemory, onSaveMemory, onWiktionarySearch, isAddingMemory, occurrences = [], onNavigate, existingMemoryTarget, onGoToMemory, onInsertMemory }, ref) => {
   const [target, setTarget] = useState('');
   const { wiktionarySearch } = useApp();
 
@@ -57,7 +60,14 @@ const SelectionTooltip = React.forwardRef<HTMLDivElement, SelectionTooltipProps>
   return (
     <div ref={ref} style={{ position: 'absolute', top: y, left: x, zIndex: 1000, backgroundColor: 'white', border: '1px solid black', padding: '5px' }}>
       <Stack direction='horizontal' gap={1}>
-        <Button size="sm" onClick={onAddMemory}>Add Memory</Button>
+        {onInsertMemory && (
+          <Button size="sm" variant="success" onClick={onInsertMemory}>Insert</Button>
+        )}
+        {existingMemoryTarget ? (
+          <Button size="sm" variant="primary" onClick={onGoToMemory}>Go to Memory</Button>
+        ) : (
+          <Button size="sm" onClick={onAddMemory}>Add Memory</Button>
+        )}
         <Button size="sm" variant='info' onClick={handleWiktionarySearch}>Search Wiktionary</Button>
         <Dropdown>
           <Dropdown.Toggle size="sm" variant="warning" disabled={occurrences.length === 0} id="dropdown-occurrences">

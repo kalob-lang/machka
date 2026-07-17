@@ -5,12 +5,12 @@ import { useApp } from '../AppContext';
 interface UnderlinedTextProps {
   text: string;
   memories: Record<string, string>;
-  onInsert: (text: string) => void;
+  onMemoryClick: (sourceText: string, rect: DOMRect) => void;
   onMemoriesNumbered: (memories: Record<number, { source: string, target: string }>) => void;
   memoryVersion: number;
 }
 
-const UnderlinedText: React.FC<UnderlinedTextProps> = ({ text, memories, onInsert, onMemoriesNumbered, memoryVersion }) => {
+const UnderlinedText: React.FC<UnderlinedTextProps> = ({ text, memories, onMemoryClick, onMemoriesNumbered, memoryVersion }) => {
   const textRef = useRef<HTMLSpanElement>(null);
   const { autocomplete } = useApp();
 
@@ -44,9 +44,9 @@ const UnderlinedText: React.FC<UnderlinedTextProps> = ({ text, memories, onInser
   useEffect(() => {
     const handleMarkClick = (event: MouseEvent) => {
       const target = event.currentTarget as HTMLElement;
-      const translation = target.dataset.target;
-      if (translation) {
-        onInsert(translation);
+      const sourceText = target.dataset.source;
+      if (sourceText) {
+        onMemoryClick(sourceText, target.getBoundingClientRect());
       }
     };
 
@@ -83,13 +83,6 @@ const UnderlinedText: React.FC<UnderlinedTextProps> = ({ text, memories, onInser
                   }
                   const number = sourceTextToNumberMap[sourceText];
                   el.dataset.number = String(number);
-                  
-                  const badge = document.createElement('sup');
-                  badge.className = `badge rounded-pill ${memory.isAlternative ? 'bg-info' : 'bg-danger'}`;
-                  badge.textContent = String(number);
-                  badge.style.pointerEvents = 'none'; 
-                  el.appendChild(badge);
-                  badges.push(badge)
                 }
               }
             }
@@ -118,7 +111,7 @@ const UnderlinedText: React.FC<UnderlinedTextProps> = ({ text, memories, onInser
           el.removeEventListener('click', handleMarkClick);
       });
     };
-  }, [text, memoryMap, onMemoriesNumbered, autocomplete, memoryVersion, onInsert]);
+  }, [text, memoryMap, onMemoriesNumbered, autocomplete, memoryVersion, onMemoryClick]);
 
   return (
     <span id="current-editing-translation-source-text">

@@ -40,6 +40,7 @@ interface TranslationEditorProps {
   isDirty: boolean;
   setIsDirty: (isDirty: boolean) => void;
   onSourceUpdate: (updatedSource: Source) => void;
+  onNavigateToMemoryTab: (memoryKey: string) => void;
 }
 
 function isSelectionInSelector(selection: Selection, selector: string): boolean {
@@ -53,7 +54,7 @@ function isSelectionInSelector(selection: Selection, selector: string): boolean 
   return false;
 }
 
-const TranslationEditor: React.FC<TranslationEditorProps> = ({ onSplit, onTranslationsUpdate, onMemoryUpdate, memoryVersion, scrollToSegment, onScrollToSegmentHandled, isDirty, setIsDirty, onSourceUpdate }) => {
+const TranslationEditor: React.FC<TranslationEditorProps> = ({ onSplit, onTranslationsUpdate, onMemoryUpdate, memoryVersion, scrollToSegment, onScrollToSegmentHandled, isDirty, setIsDirty, onSourceUpdate, onNavigateToMemoryTab }) => {
   const { source, segments, delimiters } = useSource();
   const { spellCheck, handleSetItem, setError, scrollingReturnButtonsEnabled, scrollingReturnButtonsSensitivity } = useApp();
 
@@ -75,7 +76,7 @@ const TranslationEditor: React.FC<TranslationEditorProps> = ({ onSplit, onTransl
   const [showSplitModal, setShowSplitModal] = useState(false);
   const [splitIndex, setSplitIndex] = useState<number | null>(null);
   const [scrollToIndex, setScrollToIndex] = useState<number | null>(null);
-  const [tooltip, setTooltip] = useState<{ x: number; y: number; text: string } | null>(null);
+  const [tooltip, setTooltip] = useState<{ x: number; y: number; text: string; isEditorView?: boolean } | null>(null);
   const [isAddingMemory, setIsAddingMemory] = useState(false);
   const [showBookmarkPopover, setShowBookmarkPopover] = useState(false);
   const [notePopoverPlacement, setNotePopoverPlacement] = useState<Placement>('top');
@@ -570,9 +571,24 @@ const TranslationEditor: React.FC<TranslationEditorProps> = ({ onSplit, onTransl
     }
   };
 
+  const handleMemoryClick = useCallback((sourceText: string, rect: DOMRect) => {
+    const editorRect = editorRef.current?.getBoundingClientRect();
+    if (editorRect) {
+      setTooltip({
+        x: rect.left - editorRect.left,
+        y: rect.top - editorRect.top - 45,
+        text: sourceText,
+        isEditorView: true
+      });
+    }
+  }, []);
+
   const handleMouseUp = (event: React.MouseEvent<HTMLDivElement>) => {
     if (tooltipRef.current && tooltipRef.current.contains(event.target as Node)) {
       return;
+    }
+    if ((event.target as HTMLElement).classList?.contains('memory-highlight')) {
+        return; 
     }
     const selection = window.getSelection();
     if (selection && selection.toString() 
@@ -580,11 +596,13 @@ const TranslationEditor: React.FC<TranslationEditorProps> = ({ onSplit, onTransl
       const range = selection.getRangeAt(0);
       const rect = range.getBoundingClientRect();
       const editorRect = editorRef.current?.getBoundingClientRect();
+      const isEditorView = isSelectionInSelector(selection, '#current-editing-translation-source-text');
       if (editorRect) {
         setTooltip({ 
           x: rect.left - editorRect.left, 
           y: rect.top - editorRect.top - 45, 
-          text: selection.toString() 
+          text: selection.toString(),
+          isEditorView
         });
       }
     } else {
@@ -924,6 +942,29 @@ const TranslationEditor: React.FC<TranslationEditorProps> = ({ onSplit, onTransl
     return <p className={`mb-0 ${!translationText && segType !== 'Skip' ? 'source-text' : ''} ${segType === 'Skip' ? 'text-muted' : ''}`}>{textToShow}{delimiter && delimiterBadge}</p>;
   };
 
+  const existingMemoryTarget = tooltip && tooltip.text && memories[tooltip.text] ? memories[tooltip.text] : undefined;
+
+  const handleInsertMemoryFromTooltip = () => {
+    if (existingMemoryTarget) {
+      const targetText = existingMemoryTarget.startsWith('@') ? memories[existingMemoryTarget.substring(1)] : existingMemoryTarget;
+      if (targetText) {
+        handleInsertMemory(targetText);
+        setTooltip(null);
+      }
+    }
+  };
+
+  const handleGoToMemory = () => {
+    if (tooltip && tooltip.text) {
+      let keyToScroll = tooltip.text;
+      if (existingMemoryTarget?.startsWith('@')) {
+         keyToScroll = existingMemoryTarget.substring(1);
+      }
+      onNavigateToMemoryTab(keyToScroll);
+      setTooltip(null);
+    }
+  };
+
   return (
     <div ref={editorRef} onMouseUp={handleMouseUp} style={{ position: 'relative' }}>
       {tooltip && (
@@ -938,6 +979,9 @@ const TranslationEditor: React.FC<TranslationEditorProps> = ({ onSplit, onTransl
           isAddingMemory={isAddingMemory}
           occurrences={occurrences}
           onNavigate={(index) => handleNavigateWithSelection(index, tooltip.text)}
+          existingMemoryTarget={existingMemoryTarget}
+          onGoToMemory={handleGoToMemory}
+          onInsertMemory={tooltip.isEditorView && existingMemoryTarget ? handleInsertMemoryFromTooltip : undefined}
         />
       )}
       <WiktionaryModal show={showWiktionaryModal} onHide={() => setShowWiktionaryModal(false)} term={wiktionaryTerm} />
@@ -1044,7 +1088,7 @@ const TranslationEditor: React.FC<TranslationEditorProps> = ({ onSplit, onTransl
                       </div>
                     ) : (
                     <div className="w-100">
-                      <UnderlinedText text={segment} memories={memories} onInsert={handleInsertMemory} onMemoriesNumbered={onMemoriesNumbered} memoryVersion={memoryVersion} />
+                      <UnderlinedText text={segment} memories={memories} onMemoryClick={handleMemoryClick} onMemoriesNumbered={onMemoriesNumbered} memoryVersion={memoryVersion} />
                       {getDelimiterBadge(delimiter)}
                       <SpellCheckEditor 
                         value={currentTranslation} 
