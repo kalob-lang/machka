@@ -1089,7 +1089,9 @@ const TranslationEditor: React.FC<TranslationEditorProps> = ({ onSplit, onTransl
             const noteText = translationData?.note;
             const bookmarkData = translationData?.bookmark;
             const segType = translationData?.segmentType || 'Body';
-            const delimiter = delimiters[index]?.replaceAll('\n', '⏎');
+            
+            const originalIndex = validToOriginalIndexMap[index];
+            const delimiter = delimiters[originalIndex]?.replaceAll('\n', '⏎');
             const isFirstOccurrence = validSegments.indexOf(segment) === index;
             
             return (

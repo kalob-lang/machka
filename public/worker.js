@@ -98,28 +98,38 @@ self.onmessage = (e) => {
 
       segments.forEach((seg, i) => {
         const trimmedSeg = seg.trim();
-        if (!trimmedSeg) return;
-
-        const translationData = translations[trimmedSeg];
-        const prevTranslationData = i > 0 ? translations[segments[i - 1].trim()] : null;
-
+        
         let translationText = seg;
         let noteText = '';
 
-        if (translationData) {
-          if (translationData.segmentType === 'Skip') {
-            translationText = '';
-          } else if (typeof translationData === 'object' && translationData !== null) {
-            translationText = translationData.text || seg;
-            if (includeNotes && translationData.note) {
-              if (format === 'txt') noteText = ` [${noteCounter}]`;
-              if (format === 'md') noteText = `[^${noteCounter}]`;
-              if (format === 'html') noteText = `&nbsp;<a href="#note-${noteCounter}" id="note-ref-${noteCounter}"><sup>${noteCounter}</sup></a>`;
-              notes.push({ number: noteCounter, text: translationData.note });
-              noteCounter++;
+        if (trimmedSeg) {
+          const translationData = translations[trimmedSeg];
+          if (translationData) {
+            if (translationData.segmentType === 'Skip') {
+              translationText = '';
+            } else if (typeof translationData === 'object' && translationData !== null) {
+              const translatedString = typeof translationData.text === 'string' && translationData.text !== '' ? translationData.text : trimmedSeg;
+              const leadingMatch = seg.match(/^\s*/);
+              const trailingMatch = seg.match(/\s*$/);
+              const leadingWhitespace = leadingMatch ? leadingMatch[0] : '';
+              const trailingWhitespace = trailingMatch ? trailingMatch[0] : '';
+              translationText = leadingWhitespace + translatedString + trailingWhitespace;
+
+              if (includeNotes && translationData.note) {
+                if (format === 'txt') noteText = ` [${noteCounter}]`;
+                if (format === 'md') noteText = `[^${noteCounter}]`;
+                if (format === 'html') noteText = `&nbsp;<a href="#note-${noteCounter}" id="note-ref-${noteCounter}"><sup>${noteCounter}</sup></a>`;
+                notes.push({ number: noteCounter, text: translationData.note });
+                noteCounter++;
+              }
+            } else {
+              const translatedString = typeof translationData === 'string' && translationData !== '' ? translationData : trimmedSeg;
+              const leadingMatch = seg.match(/^\s*/);
+              const trailingMatch = seg.match(/\s*$/);
+              const leadingWhitespace = leadingMatch ? leadingMatch[0] : '';
+              const trailingWhitespace = trailingMatch ? trailingMatch[0] : '';
+              translationText = leadingWhitespace + translatedString + trailingWhitespace;
             }
-          } else {
-            translationText = translationData;
           }
         }
 
@@ -127,6 +137,8 @@ self.onmessage = (e) => {
         if (typeof translationText === 'string') {
           translationText = translationText.replace(/\u200B/g, '');
         }
+
+        const translationData = trimmedSeg ? translations[trimmedSeg] : null;
 
         if (format === 'html' && translationData?.segmentType === 'Heading') {
           flushHtmlParagraphBuffer();
@@ -141,7 +153,9 @@ self.onmessage = (e) => {
         } else {
           // Handle preceding delimiter
           if (i > 0 && delimiters[i-1]) {
-            const currentDelim = sanitize(delimiters[i-1])
+            const currentDelim = sanitize(delimiters[i-1]);
+            const prevTrimmed = segments[i-1].trim();
+            const prevTranslationData = prevTrimmed ? translations[prevTrimmed] : null;
             const prevAction = prevTranslationData?.delimiterAction;
             if (prevAction !== 'Skip Succeeding' && prevAction !== 'Skip Both') {
                 const currentAction = translationData?.delimiterAction;
