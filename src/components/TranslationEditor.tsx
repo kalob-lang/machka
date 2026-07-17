@@ -98,44 +98,84 @@ const TranslationEditor: React.FC<TranslationEditorProps> = ({ onSplit, onTransl
   const tooltipRef = useRef<HTMLDivElement>(null);
   const previousSourceIdRef = useRef<string | null>(null);
 
-  const validSegments = useMemo(() => segments.map(s => s.trim()).filter(Boolean), [segments]);
-
-  const validToOriginalIndexMap = useMemo(() => {
+  const { validSegments, validToOriginalIndexMap, leftDelimiters, rightDelimiters } = useMemo(() => {
+    const valid: string[] = [];
     const map: number[] = [];
     segments.forEach((seg, originalIndex) => {
       if (seg.trim()) {
+        valid.push(seg.trim());
         map.push(originalIndex);
       }
     });
-    return map;
-  }, [segments]);
+
+    const leftDelims = new Array(valid.length).fill(null).map(() => [] as string[]);
+    const rightDelims = new Array(valid.length).fill(null).map(() => [] as string[]);
+
+    delimiters.forEach((delim, i) => {
+      if (!delim) return;
+      const isLeft = /^\s*[{\[(<“‘«¿¡『【「《]/.test(delim);
+      if (isLeft) {
+        const validIdx = valid.findIndex((_, vIdx) => map[vIdx] >= i + 1);
+        if (validIdx !== -1) {
+          leftDelims[validIdx].push(delim);
+        } else if (valid.length > 0) {
+          rightDelims[valid.length - 1].push(delim);
+        }
+      } else {
+        let validIdx = -1;
+        for (let vIdx = valid.length - 1; vIdx >= 0; vIdx--) {
+          if (map[vIdx] <= i) {
+            validIdx = vIdx;
+            break;
+          }
+        }
+        if (validIdx !== -1) {
+          rightDelims[validIdx].push(delim);
+        } else if (valid.length > 0) {
+          leftDelims[0].push(delim);
+        }
+      }
+    });
+
+    return { 
+      validSegments: valid, 
+      validToOriginalIndexMap: map, 
+      leftDelimiters: leftDelims, 
+      rightDelimiters: rightDelims 
+    };
+  }, [segments, delimiters]);
 
   const { ref: sentinelRef, isIntersecting } = useIntersectionObserver({ threshold: 0.1 });
 
-  const getDelimiterBadge = (delimiter?: string) => {
-    if (!delimiter) return null;
+  const getDelimiterBadges = (delims: string[], side: 'left' | 'right') => {
+    if (!delims || delims.length === 0) return null;
 
-    const getColor = () => {
-        if (delimiter.includes('!')) return 'warning';
-        if (delimiter.includes('?')) return 'info';
-        return 'secondary';
-    }
+    return delims.map((delimiter, i) => {
+        const getColor = () => {
+            if (delimiter.includes('!')) return 'warning';
+            if (delimiter.includes('?')) return 'info';
+            return 'secondary';
+        }
 
-    const getTitle = () => {
-        if (delimiter.includes('!')) return 'Delimiter (Exclamation)';
-        if (delimiter.includes('?')) return 'Delimiter (Question)';
-        return 'Delimiter';
-    }
+        const getTitle = () => {
+            if (delimiter.includes('!')) return 'Delimiter (Exclamation)';
+            if (delimiter.includes('?')) return 'Delimiter (Question)';
+            return 'Delimiter';
+        }
 
-    return (
-        <Badge 
-            title={getTitle()} 
-            bg={getColor()} 
-            style={{marginLeft: '0.5em', padding: '0.75em', fontSize: '0.8em'}}
-        >
-            {delimiter}
-        </Badge>
-    );
+        const marginStyle = side === 'left' ? { marginRight: '0.5em' } : { marginLeft: '0.5em' };
+
+        return (
+            <Badge 
+                key={i}
+                title={getTitle()} 
+                bg={getColor()} 
+                style={{ ...marginStyle, padding: '0.75em', fontSize: '0.8em' }}
+            >
+                {delimiter}
+            </Badge>
+        );
+    });
   };
 
   useEffect(() => {
@@ -965,7 +1005,7 @@ const TranslationEditor: React.FC<TranslationEditorProps> = ({ onSplit, onTransl
     </Popover>
   );
 
-  const renderSegmentContent = (segment: string, translationData: any, delimiter?: string) => {
+  const renderSegmentContent = (segment: string, translationData: any, leftDelims: string[], rightDelims: string[]) => {
     const translationText = translationData?.text;
     const segType = translationData?.segmentType || 'Body';
     const outLevel = translationData?.outlineLevel || (
@@ -974,13 +1014,17 @@ const TranslationEditor: React.FC<TranslationEditorProps> = ({ onSplit, onTransl
     const textToShow = segType === 'Skip' ? segment : (translationText || segment);
 
     if (segType === 'Heading') {
-      if (outLevel === 'Level 2') return <h2>{textToShow}</h2>;
-      if (outLevel === 'Level 3') return <h3>{textToShow}</h3>;
-      if (outLevel === 'Level 4') return <h4>{textToShow}</h4>;
-      if (outLevel === 'Level 5') return <h5>{textToShow}</h5>;
+      if (outLevel === 'Level 2') return <h2>{getDelimiterBadges(leftDelims, 'left')}{textToShow}{getDelimiterBadges(rightDelims, 'right')}</h2>;
+      if (outLevel === 'Level 3') return <h3>{getDelimiterBadges(leftDelims, 'left')}{textToShow}{getDelimiterBadges(rightDelims, 'right')}</h3>;
+      if (outLevel === 'Level 4') return <h4>{getDelimiterBadges(leftDelims, 'left')}{textToShow}{getDelimiterBadges(rightDelims, 'right')}</h4>;
+      if (outLevel === 'Level 5') return <h5>{getDelimiterBadges(leftDelims, 'left')}{textToShow}{getDelimiterBadges(rightDelims, 'right')}</h5>;
     }
-    const delimiterBadge = getDelimiterBadge(delimiter);
-    return <p className={`mb-0 ${!translationText && segType !== 'Skip' ? 'source-text' : ''} ${segType === 'Skip' ? 'text-muted' : ''}`}>{textToShow}{delimiter && delimiterBadge}</p>;
+    
+    return <p className={`mb-0 ${!translationText && segType !== 'Skip' ? 'source-text' : ''} ${segType === 'Skip' ? 'text-muted' : ''}`}>
+      {getDelimiterBadges(leftDelims, 'left')}
+      {textToShow}
+      {getDelimiterBadges(rightDelims, 'right')}
+    </p>;
   };
 
   const existingMemoryTarget = tooltip && tooltip.text && memories[tooltip.text] ? memories[tooltip.text] : undefined;
@@ -1090,8 +1134,8 @@ const TranslationEditor: React.FC<TranslationEditorProps> = ({ onSplit, onTransl
             const bookmarkData = translationData?.bookmark;
             const segType = translationData?.segmentType || 'Body';
             
-            const originalIndex = validToOriginalIndexMap[index];
-            const delimiter = delimiters[originalIndex]?.replaceAll('\n', '⏎');
+            const leftD = leftDelimiters[index].map(d => d.replaceAll('\n', '⏎'));
+            const rightD = rightDelimiters[index].map(d => d.replaceAll('\n', '⏎'));
             const isFirstOccurrence = validSegments.indexOf(segment) === index;
             
             return (
@@ -1099,7 +1143,7 @@ const TranslationEditor: React.FC<TranslationEditorProps> = ({ onSplit, onTransl
                   {editingSegmentIndex === index ? (
                     !isFirstOccurrence ? (
                       <div className="w-100">
-                        {renderSegmentContent(segment, translationData, delimiter)}
+                        {renderSegmentContent(segment, translationData, leftD, rightD)}
                         <Stack direction='horizontal' gap={1} className="mt-2">
                           <Button variant="success" size="sm" onClick={() => {
                             handleCancel();
@@ -1130,9 +1174,12 @@ const TranslationEditor: React.FC<TranslationEditorProps> = ({ onSplit, onTransl
                         </Stack>
                       </div>
                     ) : (
-                    <div className="w-100">
-                      <UnderlinedText text={segment} memories={memories} onMemoryClick={handleMemoryClick} onMemoriesNumbered={onMemoriesNumbered} memoryVersion={memoryVersion} />
-                      {getDelimiterBadge(delimiter)}
+                      <div className="w-100">
+                      <div>
+                        {getDelimiterBadges(leftD, 'left')}
+                        <UnderlinedText text={segment} memories={memories} onMemoryClick={handleMemoryClick} onMemoriesNumbered={onMemoriesNumbered} memoryVersion={memoryVersion} />
+                        {getDelimiterBadges(rightD, 'right')}
+                      </div>
                       <div style={{ position: 'relative' }}>
                         <SpellCheckEditor 
                           value={currentTranslation} 
@@ -1168,7 +1215,7 @@ const TranslationEditor: React.FC<TranslationEditorProps> = ({ onSplit, onTransl
                     )
                   ) : (
                     <div className="d-flex justify-content-between align-items-center w-100">
-                      {renderSegmentContent(segment, translationData, delimiter)}
+                      {renderSegmentContent(segment, translationData, leftD, rightD)}
                       <Stack direction='horizontal'>
                         {noteText && <span title={`Note: ${noteText}`} style={{ paddingRight: '1em' }}>🗒️</span>}
                         {bookmarkData && <span title={`${bookmarkData.name}${bookmarkData.comment ? `:\n${bookmarkData.comment}` : ''}`} style={{ paddingRight: '1em' }}>🔖</span>}
