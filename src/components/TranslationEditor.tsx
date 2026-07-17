@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
-import { Form, ListGroup, Button, Badge, Stack, Dropdown, InputGroup, OverlayTrigger, Popover } from 'react-bootstrap';
+import { Form, ListGroup, Button, Badge, Stack, Dropdown, InputGroup, OverlayTrigger, Popover, CloseButton } from 'react-bootstrap';
 import Mark from 'mark.js';
 import { Source } from '../App';
 import SpellCheckEditor from './SpellCheckEditor';
@@ -384,6 +384,17 @@ const TranslationEditor: React.FC<TranslationEditorProps> = ({ onSplit, onTransl
     };
   }, [tooltipRef, isAddingMemory]);
 
+  const confirmAndProceed = (callback: () => void) => {
+    if (isDirty) {
+      if (window.confirm('You have unsaved changes. Are you sure you want to discard them?')) {
+        setIsDirty(false);
+        callback();
+      }
+    } else {
+      callback();
+    }
+  };
+
   const handleEdit = (segment: string, index?: number) => {
     const scrollContainer = document.querySelector('#page-content-wrapper');
     if (scrollContainer) {
@@ -505,6 +516,34 @@ const TranslationEditor: React.FC<TranslationEditorProps> = ({ onSplit, onTransl
           setEditingSegment(null);
           setEditingSegmentIndex(null);
           setInitialScrollTop(null);
+        }
+      }
+    }
+  };
+
+  const handleClearAndSave = (segment: string) => {
+    if (window.confirm("Are you sure you want to clear the target text?")) {
+      const trimmedSegment = segment.trim();
+      const updatedTranslations = { 
+        ...translations, 
+        [trimmedSegment]: { 
+          text: '', 
+          note: currentNote, 
+          bookmark: currentBookmark,
+          segmentType: segmentType,
+          outlineLevel: outlineLevel,
+          delimiterAction: segmentType === 'Skip' ? delimiterAction : undefined
+        } 
+      };
+      
+      if (source) {
+        if (saveData(`translations_${source.id}`, updatedTranslations)) {
+          setTranslations(updatedTranslations);
+          onTranslationsUpdate();
+          setEditingSegment(null);
+          setEditingSegmentIndex(null);
+          setInitialScrollTop(null);
+          setIsDirty(false);
         }
       }
     }
@@ -632,26 +671,28 @@ const TranslationEditor: React.FC<TranslationEditorProps> = ({ onSplit, onTransl
   }, [tooltip, validSegments, translations, editingSegment]);
 
   const handleNavigateWithSelection = (index: number, textToSelect: string) => {
-    // Hide the tooltip during scroll/navigation so it doesn't jump around
-    setTooltip(null);
+    confirmAndProceed(() => {
+      // Hide the tooltip during scroll/navigation so it doesn't jump around
+      setTooltip(null);
 
-    if (index >= visibleSegmentCount) {
-      setVisibleSegmentCount(index + 50);
-    }
-    
-    setAutoSelectText({ segmentIndex: index, text: textToSelect });
-
-    setTimeout(() => {
-      const element = document.getElementById(`segment-item-${index}`);
-      if (element) {
-        element.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        element.classList.add('highlight-scroll');
-        setTimeout(() => {
-          element.classList.remove('highlight-scroll');
-        }, 1500);
+      if (index >= visibleSegmentCount) {
+        setVisibleSegmentCount(index + 50);
       }
-      handleEdit(validSegments[index], index);
-    }, 0);
+      
+      setAutoSelectText({ segmentIndex: index, text: textToSelect });
+
+      setTimeout(() => {
+        const element = document.getElementById(`segment-item-${index}`);
+        if (element) {
+          element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          element.classList.add('highlight-scroll');
+          setTimeout(() => {
+            element.classList.remove('highlight-scroll');
+          }, 1500);
+        }
+        handleEdit(validSegments[index], index);
+      }, 0);
+    });
   };
 
   const handleAddMemory = () => {
@@ -1090,14 +1131,22 @@ const TranslationEditor: React.FC<TranslationEditorProps> = ({ onSplit, onTransl
                     <div className="w-100">
                       <UnderlinedText text={segment} memories={memories} onMemoryClick={handleMemoryClick} onMemoriesNumbered={onMemoriesNumbered} memoryVersion={memoryVersion} />
                       {getDelimiterBadge(delimiter)}
-                      <SpellCheckEditor 
-                        value={currentTranslation} 
-                        onChange={setCurrentTranslation} 
-                        onDiagnosticsChange={setDiagnostics}
-                        autofocus={editingSegmentIndex === index}
-                        numberedMemories={numberedMemories}
-                        isDirty={isDirty}
+                      <div style={{ position: 'relative' }}>
+                        <SpellCheckEditor 
+                          value={currentTranslation} 
+                          onChange={setCurrentTranslation} 
+                          onDiagnosticsChange={setDiagnostics}
+                          autofocus={editingSegmentIndex === index}
+                          numberedMemories={numberedMemories}
+                          isDirty={isDirty}
                         />
+                        <CloseButton
+                          style={{ position: 'absolute', top: '10px', right: '10px', zIndex: 10 }}
+                          title="Clear target text"
+                          onClick={() => handleClearAndSave(segment)}
+                          disabled={!currentTranslation}
+                        />
+                      </div>
                       <Stack direction='horizontal' gap={1}>
                         <Button variant="success" size="sm" className="mt-2" onClick={() => handleSaveAndEditNext(segment)} disabled={isLastSegment || (hasErrors && segmentType !== 'Skip') || (!currentTranslation && segmentType !== 'Skip')}>Save & Edit Next</Button>
                         <Button variant="primary" size="sm" className="mt-2 ml-2" onClick={() => handleSave(segment)} disabled={(hasErrors && segmentType !== 'Skip') || (!currentTranslation && segmentType !== 'Skip')}>Save</Button>
@@ -1121,7 +1170,7 @@ const TranslationEditor: React.FC<TranslationEditorProps> = ({ onSplit, onTransl
                       <Stack direction='horizontal'>
                         {noteText && <span title={`Note: ${noteText}`} style={{ paddingRight: '1em' }}>🗒️</span>}
                         {bookmarkData && <span title={`${bookmarkData.name}${bookmarkData.comment ? `:\n${bookmarkData.comment}` : ''}`} style={{ paddingRight: '1em' }}>🔖</span>}
-                        <Button variant="link" title='Edit segment' onClick={() => handleEdit(segment, index)} style={{textDecoration: 'none'}}>✏️</Button>
+                        <Button variant="link" title='Edit segment' onClick={() => confirmAndProceed(() => handleEdit(segment, index))} style={{textDecoration: 'none'}}>✏️</Button>
                       </Stack>
                     </div>
                   )}
