@@ -13,7 +13,16 @@ import Resizer from './components/Resizer';
 import ImportConflictModal from './components/ImportConflictModal';
 import ErrorModal from './components/ErrorModal';
 import pako from 'pako';
+import AddWordModal from './components/AddWordModal';
+import { lexiconData } from './vendor/kalobLexicon';
 
+export interface CompoundWord {
+  id: string;
+  word: string;
+  eng: string;
+  cat: string;
+  pos: string;
+}
 export interface Source {
   id: string;
   title: string;
@@ -90,6 +99,15 @@ const App: React.FC = () => {
   const [showSourcePreview, setShowSourcePreview] = useState(false);
   const [scrollToPreviewForSource, setScrollToPreviewForSource] = useState<string | null>(null);
   const [isDirty, setIsDirty] = useState(false);
+  const [sidebarMode, setSidebarMode] = useState<'sources' | 'dictionary'>('sources');
+  const [dictionaryType, setDictionaryType] = useState('All');
+  const [dictionaryFilter, setDictionaryFilter] = useState('');
+  const [showAddWordModal, setShowAddWordModal] = useState(false);
+  const [compoundWords, setCompoundWords] = useState<CompoundWord[]>(() => {
+    const stored = localStorage.getItem('compoundWords');
+    return stored ? JSON.parse(stored) : [];
+  });
+
 
   const {
     theme, error, setError, handleSetItem, updateStorageVersion,
@@ -589,6 +607,38 @@ const App: React.FC = () => {
       }
     });
 
+  const handleAddCompoundWord = (word: string, eng: string) => {
+    const newWord: CompoundWord = {
+      id: new Date().toISOString(),
+      word,
+      eng,
+      cat: 'Compound',
+      pos: 'Noun',
+    };
+    const updated = [...compoundWords, newWord];
+    setCompoundWords(updated);
+    handleSetItem('compoundWords', JSON.stringify(updated));
+  };
+
+  const handleDeleteCompoundWord = (id: string) => {
+    const updated = compoundWords.filter(w => w.id !== id);
+    setCompoundWords(updated);
+    handleSetItem('compoundWords', JSON.stringify(updated));
+  };
+
+  const uniqueCategories = ['All', ...Array.from(new Set(lexiconData.map(d => d.cat))), 'Compound'];
+  
+  const allDictionaryWords = [...lexiconData, ...compoundWords];
+  
+  const filteredDictionaryWords = allDictionaryWords.filter(entry => {
+    const matchesType = dictionaryType === 'All' || entry.cat === dictionaryType;
+    if (!matchesType) return false;
+    
+    if (!dictionaryFilter) return true;
+    const filterLower = dictionaryFilter.toLowerCase();
+    return entry.word.toLowerCase().includes(filterLower) || entry.eng.toLowerCase().includes(filterLower);
+  });
+
   const getHeadings = (source: Source): Heading[] => {
     const rawTranslations = localStorage.getItem(`translations_${source.id}`);
     if (!rawTranslations) return [];
@@ -672,59 +722,114 @@ const App: React.FC = () => {
         <div className="bg-light border-right" id="sidebar-wrapper" style={{ width: sidebarOpen ? sidebarWidth : 0 }}>
           <div className="sidebar-heading">
             <Stack direction='horizontal' gap={1}>
-              <span>Your Sources</span>
-              <Dropdown onSelect={(e) => handleSortChange(e as SortOrder)} className='ms-auto' >
-                <Dropdown.Toggle variant="outline-secondary"  id="dropdown-basic">
-                  Sort
+              <Dropdown onSelect={(e) => setSidebarMode(e as 'sources' | 'dictionary')}>
+                <Dropdown.Toggle variant="outline-dark" id="dropdown-mode" style={{ border: 'none', fontWeight: 'bold' }}>
+                  {sidebarMode === 'sources' ? 'Your Sources' : 'Dictionary'}
                 </Dropdown.Toggle>
                 <Dropdown.Menu>
-                  <Dropdown.Item eventKey="Alphabetical">Alphabetical</Dropdown.Item>
-                  <Dropdown.Item eventKey="Oldest First">Oldest First</Dropdown.Item>
-                  <Dropdown.Item eventKey="Newest First">Newest First</Dropdown.Item>
-                  <Dropdown.Item eventKey="Most Recently Modified">Most Recently Modified</Dropdown.Item>
-                  <Dropdown.Item eventKey="Least Recently Modified">Least Recently Modified</Dropdown.Item>
-                  <Dropdown.Item eventKey="Longest Source">Longest Source</Dropdown.Item>
-                  <Dropdown.Item eventKey="Shortest Source">Shortest Source</Dropdown.Item>
-                  <Dropdown.Item eventKey="Most Translated">Most Translated</Dropdown.Item>
-                  <Dropdown.Item eventKey="Least Translated">Least Translated</Dropdown.Item>
+                  <Dropdown.Item eventKey="sources">Your Sources</Dropdown.Item>
+                  <Dropdown.Item eventKey="dictionary">Dictionary</Dropdown.Item>
                 </Dropdown.Menu>
               </Dropdown>
-              <Button variant='outline-info' onClick={() => setShowAddSourceModal(true)}>+</Button>
+              
+              {sidebarMode === 'sources' ? (
+                <Dropdown onSelect={(e) => handleSortChange(e as SortOrder)} className='ms-auto' >
+                  <Dropdown.Toggle variant="outline-secondary"  id="dropdown-basic">
+                    Sort
+                  </Dropdown.Toggle>
+                  <Dropdown.Menu>
+                    <Dropdown.Item eventKey="Alphabetical">Alphabetical</Dropdown.Item>
+                    <Dropdown.Item eventKey="Oldest First">Oldest First</Dropdown.Item>
+                    <Dropdown.Item eventKey="Newest First">Newest First</Dropdown.Item>
+                    <Dropdown.Item eventKey="Most Recently Modified">Most Recently Modified</Dropdown.Item>
+                    <Dropdown.Item eventKey="Least Recently Modified">Least Recently Modified</Dropdown.Item>
+                    <Dropdown.Item eventKey="Longest Source">Longest Source</Dropdown.Item>
+                    <Dropdown.Item eventKey="Shortest Source">Shortest Source</Dropdown.Item>
+                    <Dropdown.Item eventKey="Most Translated">Most Translated</Dropdown.Item>
+                    <Dropdown.Item eventKey="Least Translated">Least Translated</Dropdown.Item>
+                  </Dropdown.Menu>
+                </Dropdown>
+              ) : (
+                <Dropdown onSelect={(e) => setDictionaryType(e || 'All')} className='ms-auto' >
+                  <Dropdown.Toggle variant="outline-secondary"  id="dropdown-type">
+                    Type
+                  </Dropdown.Toggle>
+                  <Dropdown.Menu style={{ maxHeight: '400px', overflowY: 'auto' }}>
+                    {uniqueCategories.map(cat => (
+                      <Dropdown.Item key={cat} eventKey={cat}>{cat}</Dropdown.Item>
+                    ))}
+                  </Dropdown.Menu>
+                </Dropdown>
+              )}
+              <Button variant='outline-info' onClick={() => sidebarMode === 'sources' ? setShowAddSourceModal(true) : setShowAddWordModal(true)}>+</Button>
             </Stack>
           </div>
           <div className="p-2">
             <Stack direction='horizontal'>
-              <Form.Control 
-                type="text" 
-                placeholder="Filter sources..." 
-                value={sourceFilter} 
-                onChange={handleFilterChange} 
-              />
-              {sourceFilter && <Button variant="danger"  className="mt-1" onClick={clearFilter} id='sidebar-clear-search-button'>X</Button>}
+              {sidebarMode === 'sources' ? (
+                <>
+                  <Form.Control 
+                    type="text" 
+                    placeholder="Filter sources..." 
+                    value={sourceFilter} 
+                    onChange={handleFilterChange} 
+                  />
+                  {sourceFilter && <Button variant="danger"  className="mt-1" onClick={clearFilter} id='sidebar-clear-search-button'>X</Button>}
+                </>
+              ) : (
+                <>
+                  <Form.Control 
+                    type="text" 
+                    placeholder="Filter words..." 
+                    value={dictionaryFilter} 
+                    onChange={(e) => setDictionaryFilter(e.target.value)} 
+                  />
+                  {dictionaryFilter && <Button variant="danger"  className="mt-1" onClick={() => setDictionaryFilter('')} id='sidebar-clear-search-button'>X</Button>}
+                </>
+              )}
             </Stack>
             
           </div>
           <Nav className="flex-column" navbarScroll>
-            {sortedAndFilteredSources.map(source => {
-              const headings = getHeadings(source);
-              return (
-                <React.Fragment key={source.id}>
-                  <Stack direction='horizontal' className={selectedSource?.id === source.id ? 'bg-info text-bg-info' : ''}>
-                    <Nav.Link onClick={() => handleSelectSource(source)} className='flex-grow-1'>
-                      {source.filename ?? source.title}
-                    </Nav.Link>
-                    {selectedSource?.id === source.id && headings.length > 0 && (
-                      <span style={{marginRight: '0.5em', cursor: expandedOutlines[source.id] ? 'n-resize' : 's-resize'}} onClick={() => toggleOutline(source.id)} className="ms-auto p-2">{expandedOutlines[source.id] ? '▼' : '▶'}</span>
+            {sidebarMode === 'sources' ? (
+              sortedAndFilteredSources.map(source => {
+                const headings = getHeadings(source);
+                return (
+                  <React.Fragment key={source.id}>
+                    <Stack direction='horizontal' className={selectedSource?.id === source.id ? 'bg-info text-bg-info' : ''}>
+                      <Nav.Link onClick={() => handleSelectSource(source)} className='flex-grow-1'>
+                        {source.filename ?? source.title}
+                      </Nav.Link>
+                      {selectedSource?.id === source.id && headings.length > 0 && (
+                        <span style={{marginRight: '0.5em', cursor: expandedOutlines[source.id] ? 'n-resize' : 's-resize'}} onClick={() => toggleOutline(source.id)} className="ms-auto p-2">{expandedOutlines[source.id] ? '▼' : '▶'}</span>
+                      )}
+                    </Stack>
+                    {expandedOutlines[source.id] && (
+                      <div className="tree-outline">
+                        {renderTree(buildTree(headings), source.id)}
+                      </div>
+                    )}
+                  </React.Fragment>
+                )
+              })
+            ) : (
+              filteredDictionaryWords.map((entry, index) => (
+                <div key={index} className="p-2 border-bottom">
+                  <Stack direction='horizontal' className="w-100 align-items-start">
+                    <div className="flex-grow-1" style={{ minWidth: 0, width: '100%' }}>
+                      <div className="d-flex justify-content-between mb-1 w-100">
+                        <strong className="text-truncate me-2">{entry.word}</strong>
+                        <small className="text-muted text-nowrap">{entry.pos}</small>
+                      </div>
+                      <div className="text-muted" style={{ fontSize: '0.9em', whiteSpace: 'normal', wordBreak: 'break-word' }}>{entry.eng}</div>
+                    </div>
+                    {entry.cat === 'Compound' && (
+                      <Button variant="link" className="text-danger p-0 ms-2 flex-shrink-0" onClick={() => handleDeleteCompoundWord((entry as CompoundWord).id)}>🗑️</Button>
                     )}
                   </Stack>
-                  {expandedOutlines[source.id] && (
-                    <div className="tree-outline">
-                      {renderTree(buildTree(headings), source.id)}
-                    </div>
-                  )}
-                </React.Fragment>
-              )
-            })}
+                </div>
+              ))
+            )}
           </Nav>
         </div>
         <Resizer onResize={handleResize} onResizeEnd={handleResizeEnd} />
@@ -809,6 +914,11 @@ const App: React.FC = () => {
           onHide={() => setShowAddSourceModal(false)} 
           onAddSource={handleAddSource} 
           onImport={handleImportMachka}
+        />
+        <AddWordModal
+          show={showAddWordModal}
+          onHide={() => setShowAddWordModal(false)}
+          onAddWord={handleAddCompoundWord}
         />
         {conflictData && (
           <ImportConflictModal 

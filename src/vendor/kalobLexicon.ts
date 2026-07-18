@@ -6098,81 +6098,97 @@ export const lexiconData = [
   {
     "word": "w!",
     "cat": "Interjection",
+    "pos": "Interjection",
     "eng": "Yearning / Insufficient (If only!, Not Enough!, More!)"
   },
   {
     "word": "a!",
     "cat": "Interjection",
+    "pos": "Interjection",
     "eng": "Want / Despair (Alas!)"
   },
   {
     "word": "e!",
     "cat": "Interjection",
+    "pos": "Interjection",
     "eng": "Exuberance / Approval (Bravo!, Hear, hear!)"
   },
   {
     "word": "i!",
     "cat": "Interjection",
+    "pos": "Interjection",
     "eng": "Excitement / Joy (Hurray!, Oh joy!)"
   },
   {
     "word": "v!",
     "cat": "Interjection",
+    "pos": "Interjection",
     "eng": "Overwhelming / Excessive (Stop!, Too much!)"
   },
   {
     "word": "u!",
     "cat": "Interjection",
+    "pos": "Interjection",
     "eng": "Parity / Consent (Agreed!, Exactly!)"
   },
   {
     "word": "o!",
     "cat": "Interjection",
+    "pos": "Interjection",
     "eng": "Doubt / Restriction (Well..., Watch out!)"
   },
   {
     "word": "ai",
     "cat": "Interjection",
+    "pos": "Interjection",
     "eng": "Confirmation / Consent (Okay)"
   },
   {
     "word": "ao",
     "cat": "Interjection",
+    "pos": "Interjection",
     "eng": "Pain / Discomfort (Ow!)"
   },
   {
     "word": "io",
     "cat": "Interjection",
+    "pos": "Interjection",
     "eng": "Greeting (Hello, Hey!)"
   },
   {
     "word": "oi",
     "cat": "Interjection",
+    "pos": "Interjection",
     "eng": "Error (Oops!, My mistake)"
   },
   {
     "word": "ea",
     "cat": "Interjection",
+    "pos": "Interjection",
     "eng": "Appreciation (Thank you!)"
   },
   {
     "word": "ae",
     "cat": "Interjection",
+    "pos": "Interjection",
     "eng": "Politeness (Please)"
   },
   {
     "word": "ie",
     "cat": "Interjection",
+    "pos": "Interjection",
     "eng": "Yes / Affirmative"
   },
   {
     "word": "oa",
     "cat": "Interjection",
+    "pos": "Interjection",
     "eng": "No / Negative"
   },
   {
     "word": "eo",
     "cat": "Interjection",
+    "pos": "Interjection",
     "eng": "Departing Greeting (Goodbye, Farewell)"
   },
   {
