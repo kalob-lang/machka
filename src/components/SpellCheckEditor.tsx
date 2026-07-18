@@ -99,11 +99,12 @@ const letterNames = new Set([
   'qhx', 'rx', 'sx', 'shx', 'tx', 'thx', 'u', 'v', 'w', 'x', 'yx', 'zx', 'zhx'
 ]);
 
-function checkSpelling(word: string): boolean {
+function checkSpelling(word: string, compoundWords: any[] = []): boolean {
     const lowerWord = word.toLowerCase();
     if (letterNames.has(lowerWord)) return true;
     if (allRoots.has(lowerWord)) return true;
     if (compoundRegex.test(lowerWord)) return true;
+    if (compoundWords.some(cw => cw.word.toLowerCase() === lowerWord)) return true;
     return false;
 }
 
@@ -119,6 +120,16 @@ const SpellCheckEditor: React.FC<SpellCheckEditorProps> = ({ value, onChange, on
 
   useEffect(() => {
     let isCancelled = false;
+
+    let compoundWords: KalobLexiconResult[] = [];
+    try {
+      const stored = localStorage.getItem('compoundWords');
+      if (stored) {
+        compoundWords = JSON.parse(stored);
+      }
+    } catch (e) {
+      console.error("Failed to parse compound words", e);
+    }
 
     const nonZeroDigits = [
         {word: 'phwn', num: 1}, {word: 'tvbh', num: 2}, {word: 'threz', num: 3},
@@ -143,6 +154,7 @@ const SpellCheckEditor: React.FC<SpellCheckEditorProps> = ({ value, onChange, on
 
     const unifiedLexicon = [
       ...lexiconData,
+      ...compoundWords,
       ...generatedNumbers,
       ...directionalConnectives,
       ...commonSuffixes.map(s => ({
@@ -349,7 +361,7 @@ const SpellCheckEditor: React.FC<SpellCheckEditorProps> = ({ value, onChange, on
         const lookbehind = '(?<=^|[\\s\\-"\'“«<¿])'
         const lookahead = '(?=[\\s\\.,;:\\-"\'”»>?]|$)'
         const words = text.match(new RegExp(`${lookbehind}\\p{Letter}+${lookahead}`, 'gv')) || [];
-        for (const w of words) if (!/^[A-Z]/.test(w) && !checkSpelling(w)) for (const m of text.matchAll(new RegExp(`${lookbehind}${w}${lookahead}`, 'gv')))
+        for (const w of words) if (!/^[A-Z]/.test(w) && !checkSpelling(w, compoundWords)) for (const m of text.matchAll(new RegExp(`${lookbehind}${w}${lookahead}`, 'gv')))
           diagnostics.push({
             from: m.index!,
             to: m.index! + w.length,
