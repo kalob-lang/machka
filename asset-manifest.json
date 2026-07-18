@@ -1,16 +1,16 @@
 {
   "files": {
     "main.css": "/machka/static/css/main.42c125c8.css",
-    "main.js": "/machka/static/js/main.18af4d86.js",
+    "main.js": "/machka/static/js/main.e4854b3b.js",
     "static/js/453.24ebcf83.chunk.js": "/machka/static/js/453.24ebcf83.chunk.js",
     "service-worker.js": "/machka/service-worker.js",
     "index.html": "/machka/index.html",
     "main.42c125c8.css.map": "/machka/static/css/main.42c125c8.css.map",
-    "main.18af4d86.js.map": "/machka/static/js/main.18af4d86.js.map",
+    "main.e4854b3b.js.map": "/machka/static/js/main.e4854b3b.js.map",
     "453.24ebcf83.chunk.js.map": "/machka/static/js/453.24ebcf83.chunk.js.map"
   },
   "entrypoints": [
     "static/css/main.42c125c8.css",
-    "static/js/main.18af4d86.js"
+    "static/js/main.e4854b3b.js"
   ]
 }
