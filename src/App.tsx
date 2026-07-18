@@ -824,7 +824,7 @@ const App: React.FC = () => {
                       <div className="text-muted" style={{ fontSize: '0.9em', whiteSpace: 'normal', wordBreak: 'break-word' }}>{entry.eng}</div>
                     </div>
                     {entry.cat === 'Compound' && (
-                      <Button variant="link" className="text-danger p-0 ms-2 flex-shrink-0" onClick={() => handleDeleteCompoundWord((entry as CompoundWord).id)}>🗑️</Button>
+                      <Button variant="light" className="text-danger p-1 ms-2 flex-shrink-0" onClick={() => handleDeleteCompoundWord((entry as CompoundWord).id)}>🗑️</Button>
                     )}
                   </Stack>
                 </div>
