@@ -5,6 +5,11 @@ import { useApp } from '../AppContext';
 import { useSource } from '../SourceContext';
 import pako from 'pako';
 import ModeHelpAlert from './ModeHelpAlert';
+import SearchResultItem from './SearchResultItem';
+
+const escapeRegExp = (string: string) => {
+  return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
 
 // Helper to decode from base64 Uint8Array
 const atobUint8Array = (b64: string) => {
@@ -55,6 +60,8 @@ const MemoryEditor: React.FC<MemoryEditorProps> = ({ allSources, memoryVersion, 
   const [showImportPanel, setShowImportPanel] = useState(false);
   const [addingAlternativeTo, setAddingAlternativeTo] = useState<string | null>(null);
   const [newAlternative, setNewAlternative] = useState('');
+  const [translations, setTranslations] = useState<Record<string, any>>({});
+  const [expandedUsages, setExpandedUsages] = useState<Record<string, boolean>>({});
 
   useEffect(() => {
     if (source) {
@@ -73,8 +80,25 @@ const MemoryEditor: React.FC<MemoryEditorProps> = ({ allSources, memoryVersion, 
         }
       }
       setMemories(mems);
+
+      // Load translations
+      let trans = {};
+      const rawTranslations = localStorage.getItem(`translations_${source.id}`);
+      if (rawTranslations) {
+        try {
+          let decompressed = rawTranslations;
+          if (source.compression) {
+            decompressed = pako.inflate(atobUint8Array(rawTranslations), { to: 'string' });
+          }
+          trans = JSON.parse(decompressed);
+        } catch (e: any) {
+          console.error(`Could not read translations: ${e.message}`);
+        }
+      }
+      setTranslations(trans);
     } else {
       setMemories({});
+      setTranslations({});
       setImportSources([]);
     }
   }, [source, memoryVersion, setError]);
@@ -192,13 +216,24 @@ const MemoryEditor: React.FC<MemoryEditorProps> = ({ allSources, memoryVersion, 
   const getMemoryUsage = (memoryText: string): Usage[] => {
     if (!source) return [];
     return segments.map((segment, index) => {
-        if (new RegExp(`\\b${memoryText}\\b`, 'ui').test(segment)) {
+        if (new RegExp(`\\b${escapeRegExp(memoryText)}\\b`, 'ui').test(segment)) {
           return { text: `Segment ${index + 1}`, index: index };
         } else if (segment.includes(memoryText)) {
           return { text: `⚠️ Segment ${index + 1}`, index: index };
         }
         return null;
     }).filter((u): u is Usage => u !== null);
+  };
+
+  const getMatchIndices = (text: string, searchStr: string): [number, number][] => {
+      if (!searchStr) return [];
+      const regex = new RegExp(escapeRegExp(searchStr), 'gi');
+      let match;
+      const indices: [number, number][] = [];
+      while ((match = regex.exec(text)) !== null) {
+          indices.push([match.index, match.index + match[0].length - 1]);
+      }
+      return indices;
   };
 
   const finalMemories = useMemo(() => {
@@ -366,16 +401,60 @@ const MemoryEditor: React.FC<MemoryEditorProps> = ({ allSources, memoryVersion, 
               )}
             </Card.Body>
             <Card.Footer className="text-muted">
-              Usage: {mem.usage.length > 0 ? (
-                [...new Map(mem.usage.map(item => [item.index, item])).values()].map((u, i, arr) => (
-                    <React.Fragment key={u.index}>
-                        <Button className='memory-usage-example' variant="link" size="sm" onClick={() => onNavigateToSegment(u.index)} style={{textDecoration: 'none', padding: '0'}}>
-                            {u.text}
-                        </Button>
-                        {i < arr.length - 1 ? ', ' : ''}
-                    </React.Fragment>
-                ))
-              ) : 'None'}
+              <div className="d-flex justify-content-between align-items-center">
+                <span>
+                  Usage: {mem.usage.length > 0 ? (
+                    [...new Map(mem.usage.map(item => [item.index, item])).values()].map((u, i, arr) => (
+                        <React.Fragment key={u.index}>
+                            <Button className='memory-usage-example' variant="link" size="sm" onClick={() => onNavigateToSegment(u.index)} style={{textDecoration: 'none', padding: '0'}}>
+                                {u.text}
+                            </Button>
+                            {i < arr.length - 1 ? ', ' : ''}
+                        </React.Fragment>
+                    ))
+                  ) : 'None'}
+                </span>
+                {mem.usage.length > 0 && (
+                  <Button 
+                    variant="link" 
+                    size="sm" 
+                    onClick={() => setExpandedUsages(prev => ({ ...prev, [sourceText]: !prev[sourceText] }))}
+                    aria-controls={`usage-collapse-${sourceText}`}
+                    aria-expanded={expandedUsages[sourceText]}
+                  >
+                    {expandedUsages[sourceText] ? 'Hide' : 'Expand'}
+                  </Button>
+                )}
+              </div>
+              <Collapse in={expandedUsages[sourceText]}>
+                <div id={`usage-collapse-${sourceText}`} className="mt-2">
+                  {[...new Map(mem.usage.map(item => [item.index, item])).values()].map(u => {
+                      const segmentSourceText = segments[u.index];
+                      const translationData = translations[segmentSourceText.trim()];
+                      const segmentTargetText = typeof translationData === 'object' && translationData !== null ? translationData.text : (translationData || '');
+                      
+                      const sourceIndices = getMatchIndices(segmentSourceText, sourceText);
+                      // Include alternatives in source matching
+                      mem.alternatives.forEach(alt => {
+                          sourceIndices.push(...getMatchIndices(segmentSourceText, alt));
+                      });
+                      
+                      const targetIndices = getMatchIndices(segmentTargetText, mem.target);
+                      
+                      return (
+                          <SearchResultItem
+                              key={u.index}
+                              segmentNumber={u.index + 1}
+                              sourceText={segmentSourceText}
+                              targetText={segmentTargetText}
+                              sourceMatchIndices={sourceIndices}
+                              targetMatchIndices={targetIndices}
+                              onGoToSegment={onNavigateToSegment}
+                          />
+                      );
+                  })}
+                </div>
+              </Collapse>
             </Card.Footer>
           </Card>
         ))}

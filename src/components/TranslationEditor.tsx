@@ -14,6 +14,7 @@ import UnderlinedText from './UnderlinedText';
 import SelectionTooltip, { Occurrence } from './SelectionTooltip';
 import ModeHelpAlert from './ModeHelpAlert';
 import ScrollToButtons from './ScrollToButtons';
+import FindReplaceModal from './FindReplaceModal';
 
 // Helper to decode from base64 Uint8Array
 const atobUint8Array = (b64: string) => {
@@ -56,7 +57,9 @@ function isSelectionInSelector(selection: Selection, selector: string): boolean 
 
 const TranslationEditor: React.FC<TranslationEditorProps> = ({ onSplit, onTranslationsUpdate, onMemoryUpdate, memoryVersion, scrollToSegment, onScrollToSegmentHandled, isDirty, setIsDirty, onSourceUpdate, onNavigateToMemoryTab }) => {
   const { source, segments, delimiters } = useSource();
-  const { spellCheck, handleSetItem, setError, scrollingReturnButtonsEnabled, scrollingReturnButtonsSensitivity } = useApp();
+  const { spellCheck, handleSetItem, setError, scrollingReturnButtonsEnabled, scrollingReturnButtonsSensitivity, fuzzySearchThreshold } = useApp();
+
+  const [showFindReplaceModal, setShowFindReplaceModal] = useState(false);
 
   const [translations, setTranslations] = useState<Record<string, any>>({});
   const [editingSegment, setEditingSegment] = useState<string | null>(null);
@@ -650,6 +653,30 @@ const TranslationEditor: React.FC<TranslationEditorProps> = ({ onSplit, onTransl
     }
   };
 
+  const handleConfirmReplace = (replacements: { segment: string, newTarget: string }[]) => {
+    if (!source) return;
+    const updatedTranslations = { ...translations };
+    replacements.forEach(({ segment, newTarget }) => {
+        const existingData = updatedTranslations[segment];
+        if (typeof existingData === 'object' && existingData !== null) {
+            updatedTranslations[segment] = { ...existingData, text: newTarget };
+        } else {
+            updatedTranslations[segment] = newTarget;
+        }
+    });
+
+    if (saveData(`translations_${source.id}`, updatedTranslations)) {
+        setTranslations(updatedTranslations);
+        onTranslationsUpdate();
+        
+        // If we are currently editing one of the replaced segments, update the current Translation text in the editor
+        if (editingSegment && replacements.some(r => r.segment === editingSegment)) {
+            const match = replacements.find(r => r.segment === editingSegment);
+            if (match) setCurrentTranslation(match.newTarget);
+        }
+    }
+  };
+
   const handleMemoryClick = useCallback((sourceText: string, rect: DOMRect) => {
     const editorRect = editorRef.current?.getBoundingClientRect();
     if (editorRect) {
@@ -1070,6 +1097,15 @@ const TranslationEditor: React.FC<TranslationEditorProps> = ({ onSplit, onTransl
         />
       )}
       <WiktionaryModal show={showWiktionaryModal} onHide={() => setShowWiktionaryModal(false)} term={wiktionaryTerm} />
+      <FindReplaceModal 
+        show={showFindReplaceModal} 
+        onHide={() => setShowFindReplaceModal(false)} 
+        validSegments={validSegments} 
+        translations={translations} 
+        fuzzySearchThreshold={fuzzySearchThreshold} 
+        onConfirmReplace={handleConfirmReplace}
+        onGoToSegment={navigateToSegment}
+      />
       {source && splitIndex !== null && (
         <SplitSourceModal 
           show={showSplitModal}
@@ -1085,6 +1121,7 @@ const TranslationEditor: React.FC<TranslationEditorProps> = ({ onSplit, onTransl
         <h1>{translatedTitle || source.title}</h1>
         <Stack direction="horizontal" gap={2}>
           <InputGroup size="sm">
+            <Button title="Find and replace target text" variant="outline-primary" onClick={() => setShowFindReplaceModal(true)}>🔍</Button>
             <Dropdown>
               <Dropdown.Toggle variant="outline-danger" id="dropdown-basic">
                 Bookmarks

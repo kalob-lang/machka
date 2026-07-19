@@ -15,7 +15,8 @@ const Settings: React.FC = () => {
     showModeHelp, setShowModeHelp,
     translationSanitization, setTranslationSanitization,
     scrollingReturnButtonsEnabled, setScrollingReturnButtonsEnabled,
-    scrollingReturnButtonsSensitivity, setScrollingReturnButtonsSensitivity
+    scrollingReturnButtonsSensitivity, setScrollingReturnButtonsSensitivity,
+    fuzzySearchThreshold, setFuzzySearchThreshold
   } = useApp();
   const [storageUsage, setStorageUsage] = useState({ used: 0, percentage: 0 });
 
@@ -172,6 +173,20 @@ const Settings: React.FC = () => {
               <option value="modal">Modal</option>
               <option value="new-tab">New Tab</option>
             </Form.Control>
+          </Form.Group>
+          <hr />
+          <Form.Group controlId="fuzzySearchThreshold" className="mb-3">
+            <Form.Label>Fuzzy Search Threshold (Find and Replace): {fuzzySearchThreshold}%</Form.Label>
+            <Form.Range
+              min="0"
+              max="30"
+              step="1"
+              value={fuzzySearchThreshold}
+              onChange={(e) => setFuzzySearchThreshold(parseInt(e.target.value, 10))}
+            />
+            <Form.Text>
+              0% means exact match only. Higher percentages allow more typos and fuzziness when searching (max 30%).
+            </Form.Text>
           </Form.Group>
           <hr />
           <Form.Check

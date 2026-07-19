@@ -31,6 +31,8 @@ interface AppContextType {
   setScrollingReturnButtonsEnabled: (value: boolean) => void;
   scrollingReturnButtonsSensitivity: number;
   setScrollingReturnButtonsSensitivity: (value: number) => void;
+  fuzzySearchThreshold: number;
+  setFuzzySearchThreshold: (value: number) => void;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -49,6 +51,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [translationSanitization, rawSetTranslationSanitization] = useState(() => localStorage.getItem('translationSanitization') !== 'false');
   const [scrollingReturnButtonsEnabled, rawSetScrollingReturnButtonsEnabled] = useState(() => localStorage.getItem('scrollingReturnButtonsEnabled') !== 'false');
   const [scrollingReturnButtonsSensitivity, rawSetScrollingReturnButtonsSensitivity] = useState(() => parseInt(localStorage.getItem('scrollingReturnButtonsSensitivity') || '5', 10));
+  const [fuzzySearchThreshold, rawSetFuzzySearchThreshold] = useState(() => parseInt(localStorage.getItem('fuzzySearchThreshold') || '5', 10));
 
 
   const updateStorageVersion = useCallback(() => setStorageVersion(v => v + 1), []);
@@ -139,6 +142,13 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }
   }, [handleSetItem]);
 
+  const setFuzzySearchThreshold = useCallback((value: number) => {
+    if (handleSetItem('fuzzySearchThreshold', String(value))) {
+      rawSetFuzzySearchThreshold(value);
+    }
+  }, [handleSetItem]);
+
+
   useEffect(() => {
     updateStorageVersion(); // Initial calculation
   }, [updateStorageVersion]);
@@ -166,8 +176,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       scrollingReturnButtonsEnabled,
       setScrollingReturnButtonsEnabled,
       scrollingReturnButtonsSensitivity,
-      setScrollingReturnButtonsSensitivity
-    }), [ theme, setTheme, spellCheck, setSpellCheck, autocomplete, setAutocomplete, wiktionarySearch, setWiktionarySearch, error, handleSetItem, storageVersion, updateStorageVersion, defaultCompression, setDefaultCompression, defaultCompressionLevel, setDefaultCompressionLevel, sourceSelectionLocation, handleSetSourceSelectionLocation, showModeHelp, setShowModeHelp, translationSanitization, setTranslationSanitization, scrollingReturnButtonsEnabled, setScrollingReturnButtonsEnabled, scrollingReturnButtonsSensitivity, setScrollingReturnButtonsSensitivity ])}>
+      setScrollingReturnButtonsSensitivity,
+      fuzzySearchThreshold,
+      setFuzzySearchThreshold
+    }), [ theme, setTheme, spellCheck, setSpellCheck, autocomplete, setAutocomplete, wiktionarySearch, setWiktionarySearch, error, handleSetItem, storageVersion, updateStorageVersion, defaultCompression, setDefaultCompression, defaultCompressionLevel, setDefaultCompressionLevel, sourceSelectionLocation, handleSetSourceSelectionLocation, showModeHelp, setShowModeHelp, translationSanitization, setTranslationSanitization, scrollingReturnButtonsEnabled, setScrollingReturnButtonsEnabled, scrollingReturnButtonsSensitivity, setScrollingReturnButtonsSensitivity, fuzzySearchThreshold, setFuzzySearchThreshold ])}>
       {children}
     </AppContext.Provider>
   );
