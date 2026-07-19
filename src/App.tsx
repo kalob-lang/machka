@@ -903,8 +903,8 @@ const App: React.FC = () => {
           </div>
           <footer className='mt-auto'>
               <div className='text-center p-4' style={{ backgroundColor: 'rgba(0, 0, 0, 0.05)' }}>
-                © {new Date().getFullYear()} Copyright: <a className='text-reset fw-bold' href='https://kalob.github.io/'>
-                  Kalob Institute
+                © {new Date().getFullYear()} Copyright: <a className='text-reset fw-bold' href='https://github.com/kalob-lang'>
+                  Kalob Language Projects
                 </a>
               </div>
           </footer>
