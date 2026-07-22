@@ -1512,6 +1512,24 @@ export const lexiconData = [
     "eng": "Than / In comparison to"
   },
   {
+    "word": "qv",
+    "cat": "Connective",
+    "pos": "Conjunction",
+    "eng": "In any case"
+  },
+  {
+    "word": "pri",
+    "cat": "Connective",
+    "pos": "Conjunction",
+    "eng": "At the price of"
+  },
+  {
+    "word": "thri",
+    "cat": "Connective",
+    "pos": "Conjunction",
+    "eng": "In proportion as / as"
+  },
+  {
     "word": "plazh",
     "cat": "Modificative",
     "pos": "Adverb",
