@@ -1520,14 +1520,20 @@ export const lexiconData = [
   {
     "word": "pri",
     "cat": "Connective",
-    "pos": "Conjunction",
+    "pos": "Preposition",
     "eng": "At the price of"
   },
   {
     "word": "thri",
     "cat": "Connective",
-    "pos": "Conjunction",
+    "pos": "Preposition",
     "eng": "In proportion as / as"
+  },
+  {
+    "word": "smi",
+    "cat": "Connective",
+    "pos": "Preposition",
+    "eng": "In proportion to"
   },
   {
     "word": "plazh",
