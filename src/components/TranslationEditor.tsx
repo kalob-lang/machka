@@ -15,6 +15,7 @@ import SelectionTooltip, { Occurrence } from './SelectionTooltip';
 import ModeHelpAlert from './ModeHelpAlert';
 import ScrollToButtons from './ScrollToButtons';
 import FindReplaceModal from './FindReplaceModal';
+import { Abjhad } from '../vendor/scripts/Abjhad';
 
 // Helper to decode from base64 Uint8Array
 const atobUint8Array = (b64: string) => {
@@ -57,7 +58,7 @@ function isSelectionInSelector(selection: Selection, selector: string): boolean 
 
 const TranslationEditor: React.FC<TranslationEditorProps> = ({ onSplit, onTranslationsUpdate, onMemoryUpdate, memoryVersion, scrollToSegment, onScrollToSegmentHandled, isDirty, setIsDirty, onSourceUpdate, onNavigateToMemoryTab }) => {
   const { source, segments, delimiters } = useSource();
-  const { spellCheck, handleSetItem, setError, scrollingReturnButtonsEnabled, scrollingReturnButtonsSensitivity, fuzzySearchThreshold } = useApp();
+  const { spellCheck, handleSetItem, setError, scrollingReturnButtonsEnabled, scrollingReturnButtonsSensitivity, fuzzySearchThreshold, transliterationEnabled, transliterationScript, transliterationFont, transliterationFontSizeMultiplier } = useApp();
 
   const [showFindReplaceModal, setShowFindReplaceModal] = useState(false);
 
@@ -1038,18 +1039,29 @@ const TranslationEditor: React.FC<TranslationEditorProps> = ({ onSplit, onTransl
     const outLevel = translationData?.outlineLevel || (
       segType === 'Heading' ? 'Level 2' : 'Skip'
     );
-    const textToShow = segType === 'Skip' ? segment : (translationText || segment);
+    let textToShow = segType === 'Skip' ? segment : (translationText || segment);
+    
+    let fontStyle: React.CSSProperties = {};
+    if (transliterationEnabled && transliterationScript === Abjhad.name) {
+      if (translationText) {
+        textToShow = Abjhad.transliterate(textToShow);
+        fontStyle = {
+          fontFamily: transliterationFont,
+          fontSize: `${transliterationFontSizeMultiplier}em`
+        };
+      }
+    }
 
     if (segType === 'Heading') {
-      if (outLevel === 'Level 2') return <h2>{getDelimiterBadges(leftDelims, 'left')}{textToShow}{getDelimiterBadges(rightDelims, 'right')}</h2>;
-      if (outLevel === 'Level 3') return <h3>{getDelimiterBadges(leftDelims, 'left')}{textToShow}{getDelimiterBadges(rightDelims, 'right')}</h3>;
-      if (outLevel === 'Level 4') return <h4>{getDelimiterBadges(leftDelims, 'left')}{textToShow}{getDelimiterBadges(rightDelims, 'right')}</h4>;
-      if (outLevel === 'Level 5') return <h5>{getDelimiterBadges(leftDelims, 'left')}{textToShow}{getDelimiterBadges(rightDelims, 'right')}</h5>;
+      if (outLevel === 'Level 2') return <h2>{getDelimiterBadges(leftDelims, 'left')}<span style={fontStyle}>{textToShow}</span>{getDelimiterBadges(rightDelims, 'right')}</h2>;
+      if (outLevel === 'Level 3') return <h3>{getDelimiterBadges(leftDelims, 'left')}<span style={fontStyle}>{textToShow}</span>{getDelimiterBadges(rightDelims, 'right')}</h3>;
+      if (outLevel === 'Level 4') return <h4>{getDelimiterBadges(leftDelims, 'left')}<span style={fontStyle}>{textToShow}</span>{getDelimiterBadges(rightDelims, 'right')}</h4>;
+      if (outLevel === 'Level 5') return <h5>{getDelimiterBadges(leftDelims, 'left')}<span style={fontStyle}>{textToShow}</span>{getDelimiterBadges(rightDelims, 'right')}</h5>;
     }
     
     return <p className={`mb-0 ${!translationText && segType !== 'Skip' ? 'source-text' : ''} ${segType === 'Skip' ? 'text-muted' : ''}`}>
       {getDelimiterBadges(leftDelims, 'left')}
-      {textToShow}
+      <span style={fontStyle}>{textToShow}</span>
       {getDelimiterBadges(rightDelims, 'right')}
     </p>;
   };
@@ -1118,7 +1130,15 @@ const TranslationEditor: React.FC<TranslationEditorProps> = ({ onSplit, onTransl
         />
       )}
       <div id="translation-editor-title-bar" className="d-flex justify-content-between align-items-center">
-        <h1>{translatedTitle || source.title}</h1>
+        <h1>
+            {transliterationEnabled && transliterationScript === Abjhad.name ? (
+                <span style={{ fontFamily: transliterationFont, fontSize: `${transliterationFontSizeMultiplier}em` }}>
+                    {Abjhad.transliterate(translatedTitle || source.title)}
+                </span>
+            ) : (
+                translatedTitle || source.title
+            )}
+        </h1>
         <Stack direction="horizontal" gap={2}>
           <InputGroup size="sm">
             <Button title="Find and replace target text" variant="outline-primary" onClick={() => setShowFindReplaceModal(true)}>🔍</Button>

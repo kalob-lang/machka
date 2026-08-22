@@ -33,6 +33,14 @@ interface AppContextType {
   setScrollingReturnButtonsSensitivity: (value: number) => void;
   fuzzySearchThreshold: number;
   setFuzzySearchThreshold: (value: number) => void;
+  transliterationEnabled: boolean;
+  setTransliterationEnabled: (value: boolean) => void;
+  transliterationScript: string;
+  setTransliterationScript: (value: string) => void;
+  transliterationFont: string;
+  setTransliterationFont: (value: string) => void;
+  transliterationFontSizeMultiplier: number;
+  setTransliterationFontSizeMultiplier: (value: number) => void;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -52,6 +60,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [scrollingReturnButtonsEnabled, rawSetScrollingReturnButtonsEnabled] = useState(() => localStorage.getItem('scrollingReturnButtonsEnabled') !== 'false');
   const [scrollingReturnButtonsSensitivity, rawSetScrollingReturnButtonsSensitivity] = useState(() => parseInt(localStorage.getItem('scrollingReturnButtonsSensitivity') || '5', 10));
   const [fuzzySearchThreshold, rawSetFuzzySearchThreshold] = useState(() => parseInt(localStorage.getItem('fuzzySearchThreshold') || '5', 10));
+  const [transliterationEnabled, rawSetTransliterationEnabled] = useState(() => localStorage.getItem('transliterationEnabled') === 'true');
+  const [transliterationScript, rawSetTransliterationScript] = useState(() => localStorage.getItem('transliterationScript') || 'Abjhad');
+  const [transliterationFont, rawSetTransliterationFont] = useState(() => localStorage.getItem('transliterationFont') || 'System Default');
+  const [transliterationFontSizeMultiplier, rawSetTransliterationFontSizeMultiplier] = useState(() => parseFloat(localStorage.getItem('transliterationFontSizeMultiplier') || '1'));
 
 
   const updateStorageVersion = useCallback(() => setStorageVersion(v => v + 1), []);
@@ -148,6 +160,30 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }
   }, [handleSetItem]);
 
+  const setTransliterationEnabled = useCallback((value: boolean) => {
+    if (handleSetItem('transliterationEnabled', String(value))) {
+      rawSetTransliterationEnabled(value);
+    }
+  }, [handleSetItem]);
+
+  const setTransliterationScript = useCallback((value: string) => {
+    if (handleSetItem('transliterationScript', value)) {
+      rawSetTransliterationScript(value);
+    }
+  }, [handleSetItem]);
+
+  const setTransliterationFont = useCallback((value: string) => {
+    if (handleSetItem('transliterationFont', value)) {
+      rawSetTransliterationFont(value);
+    }
+  }, [handleSetItem]);
+
+  const setTransliterationFontSizeMultiplier = useCallback((value: number) => {
+    if (handleSetItem('transliterationFontSizeMultiplier', String(value))) {
+      rawSetTransliterationFontSizeMultiplier(value);
+    }
+  }, [handleSetItem]);
+
 
   useEffect(() => {
     updateStorageVersion(); // Initial calculation
@@ -178,8 +214,12 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       scrollingReturnButtonsSensitivity,
       setScrollingReturnButtonsSensitivity,
       fuzzySearchThreshold,
-      setFuzzySearchThreshold
-    }), [ theme, setTheme, spellCheck, setSpellCheck, autocomplete, setAutocomplete, wiktionarySearch, setWiktionarySearch, error, handleSetItem, storageVersion, updateStorageVersion, defaultCompression, setDefaultCompression, defaultCompressionLevel, setDefaultCompressionLevel, sourceSelectionLocation, handleSetSourceSelectionLocation, showModeHelp, setShowModeHelp, translationSanitization, setTranslationSanitization, scrollingReturnButtonsEnabled, setScrollingReturnButtonsEnabled, scrollingReturnButtonsSensitivity, setScrollingReturnButtonsSensitivity, fuzzySearchThreshold, setFuzzySearchThreshold ])}>
+      setFuzzySearchThreshold,
+      transliterationEnabled, setTransliterationEnabled,
+      transliterationScript, setTransliterationScript,
+      transliterationFont, setTransliterationFont,
+      transliterationFontSizeMultiplier, setTransliterationFontSizeMultiplier
+    }), [ theme, setTheme, spellCheck, setSpellCheck, autocomplete, setAutocomplete, wiktionarySearch, setWiktionarySearch, error, handleSetItem, storageVersion, updateStorageVersion, defaultCompression, setDefaultCompression, defaultCompressionLevel, setDefaultCompressionLevel, sourceSelectionLocation, handleSetSourceSelectionLocation, showModeHelp, setShowModeHelp, translationSanitization, setTranslationSanitization, scrollingReturnButtonsEnabled, setScrollingReturnButtonsEnabled, scrollingReturnButtonsSensitivity, setScrollingReturnButtonsSensitivity, fuzzySearchThreshold, setFuzzySearchThreshold, transliterationEnabled, setTransliterationEnabled, transliterationScript, setTransliterationScript, transliterationFont, setTransliterationFont, transliterationFontSizeMultiplier, setTransliterationFontSizeMultiplier ])}>
       {children}
     </AppContext.Provider>
   );

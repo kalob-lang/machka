@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Button, Card, Form, Stack, ProgressBar, Row, Col } from 'react-bootstrap';
 import { CompressionLevel, useApp, SourceSelectionLocation } from '../AppContext';
+import { Abjhad } from '../vendor/scripts/Abjhad';
 
 const Settings: React.FC = () => {
   const { 
@@ -16,7 +17,11 @@ const Settings: React.FC = () => {
     translationSanitization, setTranslationSanitization,
     scrollingReturnButtonsEnabled, setScrollingReturnButtonsEnabled,
     scrollingReturnButtonsSensitivity, setScrollingReturnButtonsSensitivity,
-    fuzzySearchThreshold, setFuzzySearchThreshold
+    fuzzySearchThreshold, setFuzzySearchThreshold,
+    transliterationEnabled, setTransliterationEnabled,
+    transliterationScript, setTransliterationScript,
+    transliterationFont, setTransliterationFont,
+    transliterationFontSizeMultiplier, setTransliterationFontSizeMultiplier
   } = useApp();
   const [storageUsage, setStorageUsage] = useState({ used: 0, percentage: 0 });
 
@@ -217,6 +222,48 @@ const Settings: React.FC = () => {
               onChange={(e) => setDefaultCompressionLevel(parseInt(e.target.value, 10) as CompressionLevel)} 
             />
           </Form.Group>
+        </Card.Body>
+      </Card>
+
+      <Card className="mt-4">
+        <Card.Header>Transliteration</Card.Header>
+        <Card.Body>
+          <Form.Check 
+            type="switch"
+            id="transliteration-enabled-switch"
+            label="Enable Transliteration"
+            checked={transliterationEnabled}
+            onChange={(e) => setTransliterationEnabled(e.target.checked)}
+          />
+          {transliterationEnabled && (
+            <>
+              <Form.Group controlId="transliterationScriptSelect" className="mt-3">
+                <Form.Label>Writing System</Form.Label>
+                <Form.Control as="select" value={transliterationScript} onChange={(e) => setTransliterationScript(e.target.value)}>
+                  {/* Currently only Abjhad is supported, but this can be dynamically populated in the future */}
+                  <option value={Abjhad.name}>{Abjhad.name}</option>
+                </Form.Control>
+              </Form.Group>
+              <Form.Group controlId="transliterationFontSelect" className="mt-3">
+                <Form.Label>Font</Form.Label>
+                <Form.Control as="select" value={transliterationFont} onChange={(e) => setTransliterationFont(e.target.value)}>
+                  {Abjhad.fonts.map(font => (
+                    <option key={font} value={font}>{font}</option>
+                  ))}
+                </Form.Control>
+              </Form.Group>
+              <Form.Group controlId="transliterationFontSizeMultiplier" className="mt-3">
+                <Form.Label>Font Size Multiplier: {transliterationFontSizeMultiplier.toFixed(2)}x</Form.Label>
+                <Form.Range
+                  min="0.5" 
+                  max="3" 
+                  step="0.1" 
+                  value={transliterationFontSizeMultiplier} 
+                  onChange={(e) => setTransliterationFontSizeMultiplier(parseFloat(e.target.value))} 
+                />
+              </Form.Group>
+            </>
+          )}
         </Card.Body>
       </Card>
       

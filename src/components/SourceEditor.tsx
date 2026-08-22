@@ -6,6 +6,7 @@ import { CompressionLevel, useApp } from '../AppContext';
 import { useSource, getCreationDate } from '../SourceContext';
 import pako from 'pako';
 import ModeHelpAlert from './ModeHelpAlert';
+import { Abjhad } from '../vendor/scripts/Abjhad';
 
 // Helper to decode from base64 Uint8Array
 const atobUint8Array = (b64: string) => {
@@ -43,7 +44,7 @@ const SourceEditor: React.FC<SourceEditorProps> = ({
   translationSanitization
 }) => {
   const { source, decompressedContent } = useSource();
-  const { setError, handleSetItem, updateStorageVersion } = useApp();
+  const { setError, handleSetItem, updateStorageVersion, transliterationEnabled, transliterationScript, transliterationFont, transliterationFontSizeMultiplier } = useApp();
 
   const [title, setTitle] = useState('');
   const [filename, setFilename] = useState('');
@@ -139,7 +140,7 @@ const SourceEditor: React.FC<SourceEditorProps> = ({
       setOriginalCompression(compression);
       setOriginalCompressionLevel(level);
 
-      let translations = {};
+      let translations: Record<string, any> = {};
       const rawTranslations = localStorage.getItem(`translations_${source.id}`);
       if (rawTranslations) {
         try {
@@ -154,6 +155,18 @@ const SourceEditor: React.FC<SourceEditorProps> = ({
       }
       setTranslatedTitle((translations as any)['__title__'] || '');
 
+      let workerTranslations = { ...translations };
+      if (transliterationEnabled && transliterationScript === Abjhad.name) {
+         Object.keys(workerTranslations).forEach(key => {
+             const data = workerTranslations[key];
+             if (typeof data === 'object' && data !== null && data.text) {
+                 workerTranslations[key] = { ...data, text: Abjhad.transliterate(data.text) };
+             } else if (typeof data === 'string') {
+                 workerTranslations[key] = Abjhad.transliterate(data);
+             }
+         });
+      }
+
       const worker = new Worker(process.env.PUBLIC_URL + '/worker.js');
       worker.onmessage = (e) => {
         if (e.data.task === 'stats') {
@@ -167,11 +180,11 @@ const SourceEditor: React.FC<SourceEditorProps> = ({
         content: decompressedContent, 
         segmentationRule: rule, 
         cancelTriggers: initialCancelTriggers.split('\n'),
-        translations, 
+        translations: workerTranslations, 
         translationSanitization 
       });
     }
-  }, [source, translationsVersion, decompressedContent, setError, translationSanitization]);
+  }, [source, translationsVersion, decompressedContent, setError, translationSanitization, transliterationEnabled, transliterationScript]);
 
 
 
@@ -598,9 +611,23 @@ const SourceEditor: React.FC<SourceEditorProps> = ({
             <br/>
             <Collapse in={showPreview}>
               <Card>
-                <Card.Title id='RenPreviewCollapseCardTitle'>{translatedTitle || title}</Card.Title>
+                <Card.Title id='RenPreviewCollapseCardTitle'>
+                    {transliterationEnabled && transliterationScript === Abjhad.name ? (
+                      <span style={{ fontFamily: transliterationFont, fontSize: `${transliterationFontSizeMultiplier}em` }}>
+                        {Abjhad.transliterate(translatedTitle || title)}
+                      </span>
+                    ) : (
+                      translatedTitle || title
+                    )}
+                </Card.Title>
                 <Card.Body>
-                  <div dangerouslySetInnerHTML={{ __html: includeNotes ? renderedContent.html : renderedContent.html_no_notes }} />
+                  <div 
+                    dangerouslySetInnerHTML={{ __html: includeNotes ? renderedContent.html : renderedContent.html_no_notes }} 
+                    style={transliterationEnabled && transliterationScript === Abjhad.name ? {
+                      fontFamily: transliterationFont,
+                      fontSize: `${transliterationFontSizeMultiplier}em`
+                    } : undefined}
+                  />
                 </Card.Body>
               </Card>
             </Collapse>
