@@ -1,16 +1,41 @@
 {
   "files": {
-    "main.css": "/machka/static/css/main.42c125c8.css",
-    "main.js": "/machka/static/js/main.f366858d.js",
+    "main.css": "/machka/static/css/main.f45ca239.css",
+    "main.js": "/machka/static/js/main.c5c7bf18.js",
     "static/js/453.24ebcf83.chunk.js": "/machka/static/js/453.24ebcf83.chunk.js",
+    "static/media/Gentium-ExtraBold.ttf": "/machka/static/media/Gentium-ExtraBold.1ed76e4ffb76c4bc3a21.ttf",
+    "static/media/Gentium-Bold.ttf": "/machka/static/media/Gentium-Bold.0788cce62eea700e6ecd.ttf",
+    "static/media/Gentium-SemiBold.ttf": "/machka/static/media/Gentium-SemiBold.0c79016998c0abc0ced5.ttf",
+    "static/media/Gentium-Medium.ttf": "/machka/static/media/Gentium-Medium.bce15ac33c05c59127a8.ttf",
+    "static/media/DoulosSIL-Regular.ttf": "/machka/static/media/DoulosSIL-Regular.5a559ce2a4f85c1eb067.ttf",
+    "static/media/Charis-Medium.ttf": "/machka/static/media/Charis-Medium.17c205524f8a687734ea.ttf",
+    "static/media/Charis-Regular.ttf": "/machka/static/media/Charis-Regular.1922b07618db2bd3655f.ttf",
+    "static/media/Charis-Bold.ttf": "/machka/static/media/Charis-Bold.56e44cc13f846cb1754d.ttf",
+    "static/media/Charis-SemiBold.ttf": "/machka/static/media/Charis-SemiBold.460ec924b3fa81799b42.ttf",
+    "static/media/Andika-Bold.ttf": "/machka/static/media/Andika-Bold.6be74582783aef82e5b3.ttf",
+    "static/media/Andika-SemiBold.ttf": "/machka/static/media/Andika-SemiBold.249663d7067fbd82569d.ttf",
+    "static/media/Andika-Medium.ttf": "/machka/static/media/Andika-Medium.33979701cdd66be46bf5.ttf",
+    "static/media/Andika-Regular.ttf": "/machka/static/media/Andika-Regular.7952c98861979c0798af.ttf",
+    "static/media/NotoSans-Bold.ttf": "/machka/static/media/NotoSans-Bold.90c0409ffc455acef2a0.ttf",
+    "static/media/NotoSans_Condensed-Bold.ttf": "/machka/static/media/NotoSans_Condensed-Bold.55b982ef66dcc3145ee0.ttf",
+    "static/media/NotoSans_Condensed-ExtraBold.ttf": "/machka/static/media/NotoSans_Condensed-ExtraBold.20ca3452ffb0e1750b44.ttf",
+    "static/media/NotoSans_Condensed-SemiBold.ttf": "/machka/static/media/NotoSans_Condensed-SemiBold.41d200ae147b843d7ce4.ttf",
+    "static/media/NotoSans_Condensed-Medium.ttf": "/machka/static/media/NotoSans_Condensed-Medium.9f40652c1fcb7ce096fe.ttf",
+    "static/media/NotoSans-Black.ttf": "/machka/static/media/NotoSans-Black.4ce73d2e027e958716bd.ttf",
+    "static/media/NotoSans_Condensed-Light.ttf": "/machka/static/media/NotoSans_Condensed-Light.3972ef44bf12dcdc576f.ttf",
+    "static/media/NotoSans_Condensed-ExtraLight.ttf": "/machka/static/media/NotoSans_Condensed-ExtraLight.194e4e9554d81c9d61a0.ttf",
+    "static/media/NotoSans_Condensed-Black.ttf": "/machka/static/media/NotoSans_Condensed-Black.0a96fd708b64ca66a535.ttf",
+    "static/media/NotoSans_Condensed-Regular.ttf": "/machka/static/media/NotoSans_Condensed-Regular.08371be7ca7b91bb1271.ttf",
+    "static/media/GalSILB.ttf": "/machka/static/media/GalSILB.83a563c8dd142db365d1.ttf",
+    "static/media/GalSILR.ttf": "/machka/static/media/GalSILR.7c203ad9e696d16dc24e.ttf",
     "service-worker.js": "/machka/service-worker.js",
     "index.html": "/machka/index.html",
-    "main.42c125c8.css.map": "/machka/static/css/main.42c125c8.css.map",
-    "main.f366858d.js.map": "/machka/static/js/main.f366858d.js.map",
+    "main.f45ca239.css.map": "/machka/static/css/main.f45ca239.css.map",
+    "main.c5c7bf18.js.map": "/machka/static/js/main.c5c7bf18.js.map",
     "453.24ebcf83.chunk.js.map": "/machka/static/js/453.24ebcf83.chunk.js.map"
   },
   "entrypoints": [
-    "static/css/main.42c125c8.css",
-    "static/js/main.f366858d.js"
+    "static/css/main.f45ca239.css",
+    "static/js/main.c5c7bf18.js"
   ]
 }
