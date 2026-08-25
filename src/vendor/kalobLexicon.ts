@@ -4905,7 +4905,7 @@ export const lexiconData = [
     "word": "libh",
     "cat": "Noun/Number",
     "pos": "Noun",
-    "eng": "To go / to leave"
+    "eng": "To go / to depart / to leave / to exit / egress"
   },
   {
     "word": "ribh",
@@ -4917,7 +4917,7 @@ export const lexiconData = [
     "word": "phlez",
     "cat": "Noun/Number",
     "pos": "Noun",
-    "eng": "To enter"
+    "eng": "To enter / to access / ingress"
   },
   {
     "word": "sonz",
@@ -5026,12 +5026,6 @@ export const lexiconData = [
     "cat": "Noun/Number",
     "pos": "Noun",
     "eng": "To burn / to roast / to heat"
-  },
-  {
-    "word": "sord",
-    "cat": "Noun/Number",
-    "pos": "Noun",
-    "eng": "To go out / to exit / egress / outward boundary crossing"
   },
   {
     "word": "sorb",
