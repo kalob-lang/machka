@@ -6303,13 +6303,13 @@ export const lexiconData = [
     "word": "thu",
     "cat": "Staffword",
     "pos": "Particle",
-    "eng": "Positive subordination (that - subjunctive)."
+    "eng": "Positive subordination (Designates the subjunctive mood of the following verb)."
   },
   {
     "word": "thnu",
     "cat": "Staffword",
     "pos": "Particle",
-    "eng": "Negative subordination (that... not - subjunctive)."
+    "eng": "Negative subordination (Designates the negative subjunctive mood of the following verb)."
   },
   {
     "word": "cu",
