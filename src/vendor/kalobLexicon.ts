@@ -1191,7 +1191,7 @@ export const lexiconData = [
     "word": "pli",
     "cat": "Connective",
     "pos": "Preposition",
-    "eng": "At the house of"
+    "eng": "At the house of, among, in the crowd of, at the heart of"
   },
   {
     "word": "khi",
