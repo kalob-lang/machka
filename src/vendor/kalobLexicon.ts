@@ -1503,7 +1503,7 @@ export const lexiconData = [
     "word": "sri",
     "cat": "Connective",
     "pos": "Conjunction",
-    "eng": "In proportion to / at the rate of"
+    "eng": "At the rate of"
   },
   {
     "word": "rw",
@@ -1534,6 +1534,12 @@ export const lexiconData = [
     "cat": "Connective",
     "pos": "Preposition",
     "eng": "In proportion to"
+  },
+  {
+    "word": "sno",
+    "cat": "Connective",
+    "pos": "Preposition",
+    "eng": "Far from / A great distance from"
   },
   {
     "word": "plazh",
