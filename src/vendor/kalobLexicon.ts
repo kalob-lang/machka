@@ -1944,6 +1944,12 @@ export const lexiconData = [
     "eng": "often"
   },
   {
+    "word": "stezh",
+    "cat": "Modificative",
+    "pos": "Adverb",
+    "eng": "on the contrary / on the other hand / contrarily / contrariwise"
+  },
+  {
     "word": "stizh",
     "cat": "Modificative",
     "pos": "Adverb",
