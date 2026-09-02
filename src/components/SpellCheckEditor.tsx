@@ -82,10 +82,10 @@ const numberSuffixPattern = `(?:am|idh|oz|om|erl|old|in|ag|od)`;
 const nounPattern = `(?:${strictNounRootsArray.join('|')})`;
 const suffixPattern = `(?:${suffixesArray.join('|')})`;
 
-const modifier = `(?:${nounPattern}|${numberEntity})`;
 const headNoun = `${nounPattern}(?:${suffixPattern}){0,3}`;
 const headNumber = `${numberEntity}(?:${numberSuffixPattern}){0,3}`;
-const coreCompound = `(?:(?:${modifier}u)?(?:${headNoun}|${headNumber}))`;
+const compoundPart = `(?:${headNoun}|${headNumber})`;
+const coreCompound = `(?:(?:${compoundPart}u)*${compoundPart})`;
 
 const compoundRegex = new RegExp(`^[aeiouvw]?${coreCompound}u?[eioavw]?(?:zh|j)?$`);
 
