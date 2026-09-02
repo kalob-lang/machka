@@ -17,22 +17,26 @@ const UnderlinedText: React.FC<UnderlinedTextProps> = ({ text, memories, onMemor
   const memoryMap = useMemo(() => {
     const resolved: Record<string, { target: string, isAlternative: boolean }> = {};
 
+    const stripPunctuation = (str: string) => str.replace(/^[.,\/#!$%\^&\*;:{}=\-_`~()“”"']+|[.,\/#!$%\^&\*;:{}=\-_`~()“”"']+$/g, '').trim();
+
     // First, map all main memories
     for (const key in memories) {
+      const cleanKey = stripPunctuation(key);
       const value = memories[key];
       if (!value.startsWith('@')) {
-        resolved[key] = { target: value, isAlternative: false };
+        resolved[cleanKey] = { target: value, isAlternative: false };
       }
     }
 
     // Second, map all alternatives, looking up their main target
     for (const key in memories) {
+      const cleanKey = stripPunctuation(key);
       const value = memories[key];
       if (value.startsWith('@')) {
-        const mainKey = value.substring(1);
-        const mainMemoryValue = memories[mainKey];
+        const mainKey = stripPunctuation(value.substring(1));
+        const mainMemoryValue = memories[mainKey] || memories[value.substring(1)];
         if (mainMemoryValue && !mainMemoryValue.startsWith('@')) {
-          resolved[key] = { target: mainMemoryValue, isAlternative: true };
+          resolved[cleanKey] = { target: mainMemoryValue, isAlternative: true };
         }
       }
     }

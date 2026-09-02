@@ -28,6 +28,7 @@
     "fuse.js": "^7.1.0",
     "mark.js": "^8.11.1",
     "pako": "^2.1.0",
+    "playwright": "^1.62.1",
     "react": "^19.2.0",
     "react-bootstrap": "^2.10.10",
     "react-dom": "^19.2.0",

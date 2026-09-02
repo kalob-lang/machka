@@ -704,11 +704,15 @@ const TranslationEditor: React.FC<TranslationEditorProps> = ({ onSplit, onTransl
       const rect = range.getBoundingClientRect();
       const editorRect = editorRef.current?.getBoundingClientRect();
       const isEditorView = isSelectionInSelector(selection, '#current-editing-translation-source-text');
-      if (editorRect) {
+      
+      const rawText = selection.toString();
+      const cleanText = rawText.replace(/^[.,\/#!$%\^&\*;:{}=\-_`~()“”"']+|[.,\/#!$%\^&\*;:{}=\-_`~()“”"']+$/g, '').trim();
+
+      if (editorRect && cleanText) {
         setTooltip({ 
           x: rect.left - editorRect.left, 
           y: rect.top - editorRect.top - 45, 
-          text: selection.toString(),
+          text: cleanText,
           isEditorView
         });
       }
@@ -944,6 +948,17 @@ const TranslationEditor: React.FC<TranslationEditorProps> = ({ onSplit, onTransl
             ✂️ Split Source Before This Segment
           </Button>
         </div>
+
+        <Button 
+          variant="danger" 
+          size="sm" 
+          className="w-100 mb-3" 
+          onClick={() => handleClearAndSave(validSegments[index])}
+          disabled={!currentTranslation}
+          title="Clear target text"
+        >
+          🗑️ Clear Target Text
+        </Button>
 
         <Form.Group className="mb-3">
             <Form.Label>Segment Type</Form.Label>
@@ -1245,12 +1260,6 @@ const TranslationEditor: React.FC<TranslationEditorProps> = ({ onSplit, onTransl
                           autofocus={editingSegmentIndex === index}
                           numberedMemories={numberedMemories}
                           isDirty={isDirty}
-                        />
-                        <CloseButton
-                          style={{ position: 'absolute', top: '10px', right: '10px', zIndex: 10 }}
-                          title="Clear target text"
-                          onClick={() => handleClearAndSave(segment)}
-                          disabled={!currentTranslation}
                         />
                       </div>
                       <Stack direction='horizontal' gap={1}>
