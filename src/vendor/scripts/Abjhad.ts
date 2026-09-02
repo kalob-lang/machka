@@ -17,7 +17,7 @@ const cypherMap: Record<string, string> = {
     'qh': 'ʊ̱',
     'sh': 's̱', 'zh': 'ƨ̱',
     'ch': 'ɛ̱', 'jh': 'ɜ̱',
-    'm': 'ƞ', 'n': 'ʜ',
+    'm': 'q', 'n': 'ƞ',
     'l': 'ꞁ',
     'r': 'ɽ',
     'y': 'ɥ',
