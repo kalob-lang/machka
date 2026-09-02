@@ -68,7 +68,10 @@ const UnderlinedText: React.FC<UnderlinedTextProps> = ({ text, memories, onMemor
         if (memoryKeys.length > 0) {
           instance.mark(memoryKeys, {
             separateWordSearch: false,
-            accuracy: 'exactly',
+            accuracy: {
+              value: 'exactly',
+              limiters: [",", ".", "!", "?", ";", ":", "-", "–", "—", '"', "'", "(", ")", "[", "]", "{", "}"]
+            },
             className: 'memory-highlight',
             exclude: ['sup'],
             each: (el) => {
