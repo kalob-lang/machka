@@ -1,6 +1,7 @@
 import React, { useMemo, useState, useEffect } from 'react';
 import { Modal, Button } from 'react-bootstrap';
 import { useIntersectionObserver } from '../hooks/useIntersectionObserver';
+import { segmentText } from '../utils/segmentation';
 
 interface SegmentationPreviewModalProps {
   show: boolean;
@@ -36,46 +37,7 @@ const SegmentationPreviewModal: React.FC<SegmentationPreviewModalProps> = ({ sho
     if (!show) return null;
 
     try {
-      const wrappedRule = `(${rule})`;
-      const regex = new RegExp(wrappedRule, 'g');
-      const parts = content.split(regex);
-      
-      const triggers = cancelTriggers?.filter(t => t.trim() !== '') || [];
-      
-      let segments: string[] = [];
-      let delimiters: string[] = [];
-      
-      if (triggers.length === 0) {
-        segments = parts.filter((_, i) => i % 2 === 0);
-        delimiters = parts.filter((_, i) => i % 2 !== 0);
-      } else {
-        let currentSegment = parts[0] || '';
-        for (let i = 1; i < parts.length; i += 2) {
-          const delimiter = parts[i];
-          const nextSegment = parts[i + 1] || '';
-          
-          const textSoFar = currentSegment + delimiter;
-          const trimmedSoFar = textSoFar.trimEnd();
-          const segmentTrimmed = currentSegment.trimEnd();
-          
-          let isCancelled = false;
-          for (const trigger of triggers) {
-            if (trimmedSoFar.endsWith(trigger) || segmentTrimmed.endsWith(trigger)) {
-              isCancelled = true;
-              break;
-            }
-          }
-          
-          if (isCancelled) {
-            currentSegment = textSoFar + nextSegment;
-          } else {
-            segments.push(currentSegment);
-            delimiters.push(delimiter);
-            currentSegment = nextSegment;
-          }
-        }
-        segments.push(currentSegment);
-      }
+      const { segments, delimiters } = segmentText(content, rule, cancelTriggers);
 
       const highlighted = segments.slice(0, visibleCount).reduce<React.ReactNode[]>((acc, segment, index) => {
         const delimiter = delimiters[index] || '';
