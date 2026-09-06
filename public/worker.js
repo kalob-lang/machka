@@ -147,9 +147,23 @@ self.onmessage = (e) => {
           return; // Skip delimiter and normal processing for headings
         }
 
+        if (format === 'html' && translationData?.segmentType === 'Blockquote') {
+          flushHtmlParagraphBuffer();
+          reconstructed += `<blockquote class="blockquote" style="border-left: 4px solid var(--bs-border-color, gray); padding-left: 1rem; font-style: italic; opacity: 0.8;">${translationText}${noteText}</blockquote>\n`;
+          return; // Skip delimiter and normal processing for blockquotes
+        }
+
         if (format === 'md' && translationData?.segmentType === 'Heading') {
           const level = translationData.outlineLevel?.replace('Level ', '') || '2';
-          reconstructed += '#'.repeat(parseInt(level, 10)) + ' ' + translationText + '\n\n';
+          reconstructed += '#'.repeat(parseInt(level, 10)) + ' ' + translationText + noteText + '\n\n';
+        } else if (format === 'md' && translationData?.segmentType === 'Blockquote') {
+          const lines = (translationText + noteText).split('\n');
+          const bqText = lines.map(line => '> ' + line).join('\n');
+          reconstructed += bqText + '\n\n';
+        } else if (format === 'txt' && translationData?.segmentType === 'Blockquote') {
+          const lines = (translationText + noteText).split('\n');
+          const bqText = lines.map(line => '\t' + line).join('\n');
+          reconstructed += bqText + '\n\n';
         } else {
           // Handle preceding delimiter
           if (i > 0 && delimiters[i-1]) {

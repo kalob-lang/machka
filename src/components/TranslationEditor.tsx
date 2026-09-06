@@ -27,7 +27,7 @@ const atobUint8Array = (b64: string) => {
   return new Uint8Array(byteNumbers);
 }
 
-type SegmentType = 'Body' | 'Heading' | 'Skip';
+type SegmentType = 'Body' | 'Heading' | 'Skip' | 'Blockquote';
 type OutlineLevel = 'Skip' | 'Level 2' | 'Level 3' | 'Level 4' | 'Level 5';
 type DelimiterAction = 'Skip Preceding' | 'Skip Succeeding' | 'Skip Both' | 'Keep Both';
 type Placement = 'top' | 'bottom';
@@ -966,6 +966,7 @@ const TranslationEditor: React.FC<TranslationEditorProps> = ({ onSplit, onTransl
                 <option value="Body">Body</option>
                 <option value="Heading">Heading</option>
                 <option value="Skip">Skip</option>
+                <option value="Blockquote">Blockquote</option>
             </Form.Select>
         </Form.Group>
         {segmentType === 'Heading' && (
@@ -1072,6 +1073,16 @@ const TranslationEditor: React.FC<TranslationEditorProps> = ({ onSplit, onTransl
       if (outLevel === 'Level 3') return <h3>{getDelimiterBadges(leftDelims, 'left')}<span style={fontStyle}>{textToShow}</span>{getDelimiterBadges(rightDelims, 'right')}</h3>;
       if (outLevel === 'Level 4') return <h4>{getDelimiterBadges(leftDelims, 'left')}<span style={fontStyle}>{textToShow}</span>{getDelimiterBadges(rightDelims, 'right')}</h4>;
       if (outLevel === 'Level 5') return <h5>{getDelimiterBadges(leftDelims, 'left')}<span style={fontStyle}>{textToShow}</span>{getDelimiterBadges(rightDelims, 'right')}</h5>;
+    }
+
+    if (segType === 'Blockquote') {
+      return (
+        <blockquote className="blockquote mb-0" style={{ borderLeft: '4px solid var(--bs-border-color, gray)', paddingLeft: '1rem', fontStyle: 'italic', opacity: 0.8 }}>
+          {getDelimiterBadges(leftDelims, 'left')}
+          <span style={fontStyle}>{textToShow}</span>
+          {getDelimiterBadges(rightDelims, 'right')}
+        </blockquote>
+      );
     }
     
     return <p className={`mb-0 ${!translationText && segType !== 'Skip' ? 'source-text' : ''} ${segType === 'Skip' ? 'text-muted' : ''}`}>
