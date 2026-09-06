@@ -1,7 +1,7 @@
 {
   "files": {
-    "main.css": "/machka/static/css/main.f45ca239.css",
-    "main.js": "/machka/static/js/main.5a8e2569.js",
+    "main.css": "/machka/static/css/main.72d8a7e4.css",
+    "main.js": "/machka/static/js/main.f3f25247.js",
     "static/js/453.24ebcf83.chunk.js": "/machka/static/js/453.24ebcf83.chunk.js",
     "static/media/Gentium-ExtraBold.ttf": "/machka/static/media/Gentium-ExtraBold.1ed76e4ffb76c4bc3a21.ttf",
     "static/media/Gentium-Bold.ttf": "/machka/static/media/Gentium-Bold.0788cce62eea700e6ecd.ttf",
@@ -30,12 +30,12 @@
     "static/media/GalSILR.ttf": "/machka/static/media/GalSILR.7c203ad9e696d16dc24e.ttf",
     "service-worker.js": "/machka/service-worker.js",
     "index.html": "/machka/index.html",
-    "main.f45ca239.css.map": "/machka/static/css/main.f45ca239.css.map",
-    "main.5a8e2569.js.map": "/machka/static/js/main.5a8e2569.js.map",
+    "main.72d8a7e4.css.map": "/machka/static/css/main.72d8a7e4.css.map",
+    "main.f3f25247.js.map": "/machka/static/js/main.f3f25247.js.map",
     "453.24ebcf83.chunk.js.map": "/machka/static/js/453.24ebcf83.chunk.js.map"
   },
   "entrypoints": [
-    "static/css/main.f45ca239.css",
-    "static/js/main.5a8e2569.js"
+    "static/css/main.72d8a7e4.css",
+    "static/js/main.f3f25247.js"
   ]
 }
