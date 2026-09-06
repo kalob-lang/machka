@@ -1197,7 +1197,7 @@ const TranslationEditor: React.FC<TranslationEditorProps> = ({ onSplit, onTransl
         </Stack>
       </div>
       <Form.Group controlId="translatedTitle" className="mt-2">
-        <Form.Label>Translated Title</Form.Label>
+        <Form.Label>Translated Title {translatedTitle && `(Original: ${source.title})`}</Form.Label>
         <Form.Control 
           type="text" 
           placeholder="Enter translated title"
