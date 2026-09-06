@@ -140,22 +140,24 @@ self.onmessage = (e) => {
 
         const translationData = trimmedSeg ? translations[trimmedSeg] : null;
 
-        if (format === 'html' && translationData?.segmentType === 'Heading') {
-          flushHtmlParagraphBuffer();
-          const level = translationData.outlineLevel?.replace('Level ', '') || '2';
-          reconstructed += `<h${level}>${translationText}</h${level}>\n`;
-          return; // Skip delimiter and normal processing for headings
+        let blockquoteTrailingDelim = '';
+        if (translationData?.segmentType === 'Blockquote' && delimiters[i]) {
+            const currentDelim = sanitize(delimiters[i]);
+            if (/[^\s]/.test(currentDelim)) {
+                blockquoteTrailingDelim = currentDelim;
+            }
         }
 
-        if (format === 'md' && translationData?.segmentType === 'Heading') {
-          const level = translationData.outlineLevel?.replace('Level ', '') || '2';
-          reconstructed += '#'.repeat(parseInt(level, 10)) + ' ' + translationText + '\n\n';
-        } else {
-          // Handle preceding delimiter
-          if (i > 0 && delimiters[i-1]) {
-            const currentDelim = sanitize(delimiters[i-1]);
-            const prevTrimmed = segments[i-1].trim();
-            const prevTranslationData = prevTrimmed ? translations[prevTrimmed] : null;
+        // Handle preceding delimiter
+        if (i > 0 && delimiters[i-1]) {
+          const currentDelim = sanitize(delimiters[i-1]);
+          const prevTrimmed = segments[i-1].trim();
+          const prevTranslationData = prevTrimmed ? translations[prevTrimmed] : null;
+          
+          const prevIsBlockquote = prevTranslationData?.segmentType === 'Blockquote';
+          const skipBecauseAlreadyInBlockquote = prevIsBlockquote && /[^\s]/.test(currentDelim);
+
+          if (!skipBecauseAlreadyInBlockquote) {
             const prevAction = prevTranslationData?.delimiterAction;
             if (prevAction !== 'Skip Succeeding' && prevAction !== 'Skip Both') {
                 const currentAction = translationData?.delimiterAction;
@@ -165,6 +167,39 @@ self.onmessage = (e) => {
                 }
             }
           }
+        }
+
+        if (format === 'html' && translationData?.segmentType === 'Heading') {
+          flushHtmlParagraphBuffer();
+          const level = translationData.outlineLevel?.replace('Level ', '') || '2';
+          reconstructed += `<h${level}>${translationText}</h${level}>\n`;
+          return; // Skip delimiter and normal processing for headings
+        }
+
+        if (format === 'html' && translationData?.segmentType === 'Blockquote') {
+          flushHtmlParagraphBuffer();
+          reconstructed += `<blockquote class="blockquote" style="border-left: 4px solid var(--bs-border-color, gray); padding-left: 1rem; font-style: italic; opacity: 0.8;">${translationText}${blockquoteTrailingDelim}${noteText}</blockquote>\n`;
+          return; // Skip delimiter and normal processing for blockquotes
+        }
+
+        if (format === 'md' && translationData?.segmentType === 'Heading') {
+          if (!reconstructed.endsWith('\n') && reconstructed.length > 0) reconstructed += '\n\n';
+          else if (!reconstructed.endsWith('\n\n') && reconstructed.length > 0) reconstructed += '\n';
+          const level = translationData.outlineLevel?.replace('Level ', '') || '2';
+          reconstructed += '#'.repeat(parseInt(level, 10)) + ' ' + translationText + noteText + '\n\n';
+        } else if (format === 'md' && translationData?.segmentType === 'Blockquote') {
+          if (!reconstructed.endsWith('\n') && reconstructed.length > 0) reconstructed += '\n\n';
+          else if (!reconstructed.endsWith('\n\n') && reconstructed.length > 0) reconstructed += '\n';
+          const lines = (translationText + blockquoteTrailingDelim + noteText).split('\n');
+          const bqText = lines.map(line => '> ' + line).join('\n');
+          reconstructed += bqText + '\n\n';
+        } else if (format === 'txt' && translationData?.segmentType === 'Blockquote') {
+          if (!reconstructed.endsWith('\n') && reconstructed.length > 0) reconstructed += '\n\n';
+          else if (!reconstructed.endsWith('\n\n') && reconstructed.length > 0) reconstructed += '\n';
+          const lines = (translationText + blockquoteTrailingDelim + noteText).split('\n');
+          const bqText = lines.map(line => '\t' + line).join('\n');
+          reconstructed += bqText + '\n\n';
+        } else {
           if (format === 'html') htmlParagraphBuffer += translationText + noteText;
           else reconstructed += translationText + noteText;
         }
