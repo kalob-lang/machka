@@ -1157,9 +1157,9 @@ const TranslationEditor: React.FC<TranslationEditorProps> = ({ onSplit, onTransl
       )}
       <div id="translation-editor-title-bar" className="d-flex justify-content-between align-items-center">
         <h1>
-            {transliterationEnabled && transliterationScript === Abjhad.name ? (
+            {transliterationEnabled && transliterationScript === Abjhad.name && translatedTitle ? (
                 <span style={{ fontFamily: transliterationFont, fontSize: `${transliterationFontSizeMultiplier}em` }}>
-                    {Abjhad.transliterate(translatedTitle || source.title)}
+                    {Abjhad.transliterate(translatedTitle)}
                 </span>
             ) : (
                 translatedTitle || source.title
