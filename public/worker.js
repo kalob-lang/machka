@@ -148,6 +148,27 @@ self.onmessage = (e) => {
             }
         }
 
+        // Handle preceding delimiter
+        if (i > 0 && delimiters[i-1]) {
+          const currentDelim = sanitize(delimiters[i-1]);
+          const prevTrimmed = segments[i-1].trim();
+          const prevTranslationData = prevTrimmed ? translations[prevTrimmed] : null;
+          
+          const prevIsBlockquote = prevTranslationData?.segmentType === 'Blockquote';
+          const skipBecauseAlreadyInBlockquote = prevIsBlockquote && /[^\s]/.test(currentDelim);
+
+          if (!skipBecauseAlreadyInBlockquote) {
+            const prevAction = prevTranslationData?.delimiterAction;
+            if (prevAction !== 'Skip Succeeding' && prevAction !== 'Skip Both') {
+                const currentAction = translationData?.delimiterAction;
+                if (currentAction !== 'Skip Preceding' && currentAction !== 'Skip Both') {
+                    if (format === 'html') htmlParagraphBuffer += currentDelim;
+                    else reconstructed += currentDelim;
+                }
+            }
+          }
+        }
+
         if (format === 'html' && translationData?.segmentType === 'Heading') {
           flushHtmlParagraphBuffer();
           const level = translationData.outlineLevel?.replace('Level ', '') || '2';
@@ -162,37 +183,23 @@ self.onmessage = (e) => {
         }
 
         if (format === 'md' && translationData?.segmentType === 'Heading') {
+          if (!reconstructed.endsWith('\n') && reconstructed.length > 0) reconstructed += '\n\n';
+          else if (!reconstructed.endsWith('\n\n') && reconstructed.length > 0) reconstructed += '\n';
           const level = translationData.outlineLevel?.replace('Level ', '') || '2';
           reconstructed += '#'.repeat(parseInt(level, 10)) + ' ' + translationText + noteText + '\n\n';
         } else if (format === 'md' && translationData?.segmentType === 'Blockquote') {
+          if (!reconstructed.endsWith('\n') && reconstructed.length > 0) reconstructed += '\n\n';
+          else if (!reconstructed.endsWith('\n\n') && reconstructed.length > 0) reconstructed += '\n';
           const lines = (translationText + blockquoteTrailingDelim + noteText).split('\n');
           const bqText = lines.map(line => '> ' + line).join('\n');
           reconstructed += bqText + '\n\n';
         } else if (format === 'txt' && translationData?.segmentType === 'Blockquote') {
+          if (!reconstructed.endsWith('\n') && reconstructed.length > 0) reconstructed += '\n\n';
+          else if (!reconstructed.endsWith('\n\n') && reconstructed.length > 0) reconstructed += '\n';
           const lines = (translationText + blockquoteTrailingDelim + noteText).split('\n');
           const bqText = lines.map(line => '\t' + line).join('\n');
           reconstructed += bqText + '\n\n';
         } else {
-          // Handle preceding delimiter
-          if (i > 0 && delimiters[i-1]) {
-            const currentDelim = sanitize(delimiters[i-1]);
-            const prevTrimmed = segments[i-1].trim();
-            const prevTranslationData = prevTrimmed ? translations[prevTrimmed] : null;
-            
-            const prevIsBlockquote = prevTranslationData?.segmentType === 'Blockquote';
-            const skipBecauseAlreadyInBlockquote = prevIsBlockquote && /[^\s]/.test(currentDelim);
-
-            if (!skipBecauseAlreadyInBlockquote) {
-              const prevAction = prevTranslationData?.delimiterAction;
-              if (prevAction !== 'Skip Succeeding' && prevAction !== 'Skip Both') {
-                  const currentAction = translationData?.delimiterAction;
-                  if (currentAction !== 'Skip Preceding' && currentAction !== 'Skip Both') {
-                      if (format === 'html') htmlParagraphBuffer += currentDelim;
-                      else reconstructed += currentDelim;
-                  }
-              }
-            }
-          }
           if (format === 'html') htmlParagraphBuffer += translationText + noteText;
           else reconstructed += translationText + noteText;
         }
