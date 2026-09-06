@@ -140,6 +140,14 @@ self.onmessage = (e) => {
 
         const translationData = trimmedSeg ? translations[trimmedSeg] : null;
 
+        let blockquoteTrailingDelim = '';
+        if (translationData?.segmentType === 'Blockquote' && delimiters[i]) {
+            const currentDelim = sanitize(delimiters[i]);
+            if (/[^\s]/.test(currentDelim)) {
+                blockquoteTrailingDelim = currentDelim;
+            }
+        }
+
         if (format === 'html' && translationData?.segmentType === 'Heading') {
           flushHtmlParagraphBuffer();
           const level = translationData.outlineLevel?.replace('Level ', '') || '2';
@@ -149,7 +157,7 @@ self.onmessage = (e) => {
 
         if (format === 'html' && translationData?.segmentType === 'Blockquote') {
           flushHtmlParagraphBuffer();
-          reconstructed += `<blockquote class="blockquote" style="border-left: 4px solid var(--bs-border-color, gray); padding-left: 1rem; font-style: italic; opacity: 0.8;">${translationText}${noteText}</blockquote>\n`;
+          reconstructed += `<blockquote class="blockquote" style="border-left: 4px solid var(--bs-border-color, gray); padding-left: 1rem; font-style: italic; opacity: 0.8;">${translationText}${blockquoteTrailingDelim}${noteText}</blockquote>\n`;
           return; // Skip delimiter and normal processing for blockquotes
         }
 
@@ -157,11 +165,11 @@ self.onmessage = (e) => {
           const level = translationData.outlineLevel?.replace('Level ', '') || '2';
           reconstructed += '#'.repeat(parseInt(level, 10)) + ' ' + translationText + noteText + '\n\n';
         } else if (format === 'md' && translationData?.segmentType === 'Blockquote') {
-          const lines = (translationText + noteText).split('\n');
+          const lines = (translationText + blockquoteTrailingDelim + noteText).split('\n');
           const bqText = lines.map(line => '> ' + line).join('\n');
           reconstructed += bqText + '\n\n';
         } else if (format === 'txt' && translationData?.segmentType === 'Blockquote') {
-          const lines = (translationText + noteText).split('\n');
+          const lines = (translationText + blockquoteTrailingDelim + noteText).split('\n');
           const bqText = lines.map(line => '\t' + line).join('\n');
           reconstructed += bqText + '\n\n';
         } else {
@@ -170,13 +178,19 @@ self.onmessage = (e) => {
             const currentDelim = sanitize(delimiters[i-1]);
             const prevTrimmed = segments[i-1].trim();
             const prevTranslationData = prevTrimmed ? translations[prevTrimmed] : null;
-            const prevAction = prevTranslationData?.delimiterAction;
-            if (prevAction !== 'Skip Succeeding' && prevAction !== 'Skip Both') {
-                const currentAction = translationData?.delimiterAction;
-                if (currentAction !== 'Skip Preceding' && currentAction !== 'Skip Both') {
-                    if (format === 'html') htmlParagraphBuffer += currentDelim;
-                    else reconstructed += currentDelim;
-                }
+            
+            const prevIsBlockquote = prevTranslationData?.segmentType === 'Blockquote';
+            const skipBecauseAlreadyInBlockquote = prevIsBlockquote && /[^\s]/.test(currentDelim);
+
+            if (!skipBecauseAlreadyInBlockquote) {
+              const prevAction = prevTranslationData?.delimiterAction;
+              if (prevAction !== 'Skip Succeeding' && prevAction !== 'Skip Both') {
+                  const currentAction = translationData?.delimiterAction;
+                  if (currentAction !== 'Skip Preceding' && currentAction !== 'Skip Both') {
+                      if (format === 'html') htmlParagraphBuffer += currentDelim;
+                      else reconstructed += currentDelim;
+                  }
+              }
             }
           }
           if (format === 'html') htmlParagraphBuffer += translationText + noteText;
