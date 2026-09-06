@@ -8,6 +8,7 @@ const Settings: React.FC = () => {
     theme, setTheme, 
     spellCheck, setSpellCheck, 
     autocomplete, setAutocomplete, 
+    syntaxHighlighting, setSyntaxHighlighting,
     wiktionarySearch, setWiktionarySearch, 
     storageVersion, updateStorageVersion,
     defaultCompression, setDefaultCompression,
@@ -171,6 +172,13 @@ const Settings: React.FC = () => {
             label="Autocomplete"
             checked={autocomplete}
             onChange={(e) => setAutocomplete(e.target.checked)}
+          />
+          <Form.Check 
+            type="switch"
+            id="syntax-highlighting-switch"
+            label="Syntax Highlighting"
+            checked={syntaxHighlighting}
+            onChange={(e) => setSyntaxHighlighting(e.target.checked)}
           />
           <Form.Group controlId="wiktionarySearchSelect" className="mt-3">
             <Form.Label>Wiktionary Search</Form.Label>

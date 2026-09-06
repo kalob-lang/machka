@@ -289,3 +289,34 @@ html, body, #root {
   outline: 2px solid var(--bs-warning);
   border-radius: 5px;
 }
+
+/* Syntax Highlighting for Kalob words in SpellCheckEditor */
+.syntax-interjection { color: var(--bs-purple, #6f42c1); font-weight: bold; }
+.syntax-connective { color: var(--bs-green, #198754); font-weight: bold; }
+.syntax-designative { color: var(--bs-red, #dc3545); font-weight: bold; }
+.syntax-staffword { color: var(--bs-blue, #0d6efd); font-weight: bold; }
+.syntax-verb { color: var(--bs-warning, #ffc107); font-weight: bold; }
+.syntax-attributive { color: var(--bs-pink, #d63384); font-weight: bold; }
+.syntax-modificative { color: var(--bs-orange, #fd7e14); font-weight: bold; }
+.syntax-bold { font-weight: bold; }
+
+/* Darker yellow for light themes to improve readability */
+[data-theme="brite"] .syntax-verb,
+[data-theme="morph"] .syntax-verb,
+[data-theme="spacelab"] .syntax-verb,
+[data-theme="flatly"] .syntax-verb,
+[data-theme="journal"] .syntax-verb,
+[data-theme="litera"] .syntax-verb,
+[data-theme="lumen"] .syntax-verb,
+[data-theme="lux"] .syntax-verb,
+[data-theme="materia"] .syntax-verb,
+[data-theme="minty"] .syntax-verb,
+[data-theme="pulse"] .syntax-verb,
+[data-theme="sandstone"] .syntax-verb,
+[data-theme="simplex"] .syntax-verb,
+[data-theme="sketchy"] .syntax-verb,
+[data-theme="united"] .syntax-verb,
+[data-theme="yeti"] .syntax-verb,
+[data-theme="zephyr"] .syntax-verb {
+  color: #d39e00;
+}

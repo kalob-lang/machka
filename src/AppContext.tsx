@@ -10,6 +10,8 @@ interface AppContextType {
   setSpellCheck: (value: boolean) => void;
   autocomplete: boolean;
   setAutocomplete: (value: boolean) => void;
+  syntaxHighlighting: boolean;
+  setSyntaxHighlighting: (value: boolean) => void;
   wiktionarySearch: string;
   setWiktionarySearch: (value: string) => void;
   error: { title: string; message: React.ReactNode } | null;
@@ -49,6 +51,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [theme, rawSetTheme] = useState(() => localStorage.getItem('yon-mocko-theme') || 'brite');
   const [spellCheck, rawSetSpellCheck] = useState(() => localStorage.getItem('spellCheck') !== 'true');
   const [autocomplete, rawSetAutocomplete] = useState(() => localStorage.getItem('autocomplete') !== 'true');
+  const [syntaxHighlighting, rawSetSyntaxHighlighting] = useState(() => localStorage.getItem('syntaxHighlighting') !== 'false');
   const [wiktionarySearch, rawSetWiktionarySearch] = useState(() => localStorage.getItem('wiktionarySearch') || 'modal');
   const [error, setError] = useState<{ title: string; message: React.ReactNode } | null>(null);
   const [storageVersion, setStorageVersion] = useState(0);
@@ -101,6 +104,12 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const setAutocomplete = useCallback((value: boolean) => {
     if (handleSetItem('autocomplete', String(value))) {
       rawSetAutocomplete(value);
+    }
+  }, [handleSetItem]);
+
+  const setSyntaxHighlighting = useCallback((value: boolean) => {
+    if (handleSetItem('syntaxHighlighting', String(value))) {
+      rawSetSyntaxHighlighting(value);
     }
   }, [handleSetItem]);
 
@@ -194,6 +203,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       theme, setTheme,
       spellCheck, setSpellCheck,
       autocomplete, setAutocomplete,
+      syntaxHighlighting, setSyntaxHighlighting,
       wiktionarySearch, setWiktionarySearch,
       error, setError,
       handleSetItem,
@@ -219,7 +229,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       transliterationScript, setTransliterationScript,
       transliterationFont, setTransliterationFont,
       transliterationFontSizeMultiplier, setTransliterationFontSizeMultiplier
-    }), [ theme, setTheme, spellCheck, setSpellCheck, autocomplete, setAutocomplete, wiktionarySearch, setWiktionarySearch, error, handleSetItem, storageVersion, updateStorageVersion, defaultCompression, setDefaultCompression, defaultCompressionLevel, setDefaultCompressionLevel, sourceSelectionLocation, handleSetSourceSelectionLocation, showModeHelp, setShowModeHelp, translationSanitization, setTranslationSanitization, scrollingReturnButtonsEnabled, setScrollingReturnButtonsEnabled, scrollingReturnButtonsSensitivity, setScrollingReturnButtonsSensitivity, fuzzySearchThreshold, setFuzzySearchThreshold, transliterationEnabled, setTransliterationEnabled, transliterationScript, setTransliterationScript, transliterationFont, setTransliterationFont, transliterationFontSizeMultiplier, setTransliterationFontSizeMultiplier ])}>
+    }), [ theme, setTheme, spellCheck, setSpellCheck, autocomplete, setAutocomplete, syntaxHighlighting, setSyntaxHighlighting, wiktionarySearch, setWiktionarySearch, error, handleSetItem, storageVersion, updateStorageVersion, defaultCompression, setDefaultCompression, defaultCompressionLevel, setDefaultCompressionLevel, sourceSelectionLocation, handleSetSourceSelectionLocation, showModeHelp, setShowModeHelp, translationSanitization, setTranslationSanitization, scrollingReturnButtonsEnabled, setScrollingReturnButtonsEnabled, scrollingReturnButtonsSensitivity, setScrollingReturnButtonsSensitivity, fuzzySearchThreshold, setFuzzySearchThreshold, transliterationEnabled, setTransliterationEnabled, transliterationScript, setTransliterationScript, transliterationFont, setTransliterationFont, transliterationFontSizeMultiplier, setTransliterationFontSizeMultiplier ])}>
       {children}
     </AppContext.Provider>
   );

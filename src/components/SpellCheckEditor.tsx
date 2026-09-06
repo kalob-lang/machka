@@ -1,6 +1,6 @@
 import React, { useEffect, useRef } from 'react';
-import { EditorState } from '@codemirror/state';
-import { EditorView } from '@codemirror/view';
+import { EditorState, RangeSetBuilder } from '@codemirror/state';
+import { EditorView, Decoration, DecorationSet, ViewPlugin, ViewUpdate } from '@codemirror/view';
 import { linter, Diagnostic, forEachDiagnostic } from '@codemirror/lint';
 import { minimalSetup } from 'codemirror';
 import { autocompletion, CompletionContext } from '@codemirror/autocomplete';
@@ -99,6 +99,81 @@ const letterNames = new Set([
   'qhx', 'rx', 'sx', 'shx', 'tx', 'thx', 'u', 'v', 'w', 'x', 'yx', 'zx', 'zhx'
 ]);
 
+const interjectionMark = Decoration.mark({ class: "syntax-interjection" });
+const connectiveMark = Decoration.mark({ class: "syntax-connective" });
+const designativeMark = Decoration.mark({ class: "syntax-designative" });
+const staffwordMark = Decoration.mark({ class: "syntax-staffword" });
+const verbMark = Decoration.mark({ class: "syntax-verb" });
+const attributiveMark = Decoration.mark({ class: "syntax-attributive" });
+const modificativeMark = Decoration.mark({ class: "syntax-modificative" });
+const boldMark = Decoration.mark({ class: "syntax-bold" });
+
+const syntaxHighlightingPlugin = ViewPlugin.fromClass(class {
+  decorations: DecorationSet;
+
+  constructor(view: EditorView) {
+    this.decorations = this.buildDecorations(view);
+  }
+
+  update(update: ViewUpdate) {
+    if (update.docChanged || update.viewportChanged) {
+      this.decorations = this.buildDecorations(update.view);
+    }
+  }
+
+  buildDecorations(view: EditorView) {
+    const builder = new RangeSetBuilder<Decoration>();
+    for (let {from, to} of view.visibleRanges) {
+        const visibleText = view.state.doc.sliceString(from, to);
+        const wordRegex = /[\p{Letter}\-]+/gu;
+        let match;
+        while ((match = wordRegex.exec(visibleText)) !== null) {
+            const originalWord = match[0];
+            const word = originalWord.toLowerCase();
+            const start = from + match.index;
+            const end = start + word.length;
+            
+            if (/^[A-Z]/.test(originalWord)) {
+                builder.add(start, end, boldMark);
+                continue;
+            }
+
+            if (/^[aeiouvw]$/.test(word) || /^[aeiouvw][aeiovw]$/.test(word)) {
+                builder.add(start, end, interjectionMark);
+                continue;
+            }
+            if (/^([iovw][^aeiouvw]+|[^aeiouvw]+[iovw]|[iovw][^aeiouvw]+[iovw])$/.test(word)) {
+                builder.add(start, end, connectiveMark);
+                continue;
+            }
+            if (/^([ae][^aeiouvw]+|[^aeiouvw]+[ae]{1,2}|[ae][^aeiouvw]+[ae])$/.test(word)) {
+                builder.add(start, end, designativeMark);
+                continue;
+            }
+            if (/^([^aeiouvw]+|[aeiouvw])u$/.test(word)) {
+                builder.add(start, end, staffwordMark);
+                continue;
+            }
+            if (word.endsWith('j')) {
+                builder.add(start, end, attributiveMark);
+                continue;
+            }
+            if (word.endsWith('zh')) {
+                builder.add(start, end, modificativeMark);
+                continue;
+            }
+            if (/[aeiovw]$/.test(word)) {
+                builder.add(start, end, verbMark);
+                continue;
+            }
+        }
+    }
+    return builder.finish();
+  }
+}, {
+  decorations: v => v.decorations
+});
+
 function checkSpelling(word: string, compoundWords: any[] = []): boolean {
     const lowerWord = word.toLowerCase();
     if (letterNames.has(lowerWord)) return true;
@@ -112,7 +187,7 @@ const SpellCheckEditor: React.FC<SpellCheckEditorProps> = ({ value, onChange, on
   const editorRef = useRef<HTMLDivElement>(null);
   const viewRef = useRef<EditorView | null>(null);
   const numberedMemoriesRef = useRef(numberedMemories);
-  const { spellCheck, autocomplete } = useApp();
+  const { spellCheck, autocomplete, syntaxHighlighting } = useApp();
 
   useEffect(() => {
     numberedMemoriesRef.current = numberedMemories;
@@ -391,6 +466,10 @@ const SpellCheckEditor: React.FC<SpellCheckEditorProps> = ({ value, onChange, on
           (ctx) => customAutocomplete(ctx, fuse as unknown as Fuse<KalobLexiconResult>, false),
           (ctx) => customAutocomplete(ctx, fuse as unknown as Fuse<KalobLexiconResult>, true)
       ] }));
+    }
+
+    if (syntaxHighlighting) {
+      extensions.push(syntaxHighlightingPlugin);
     }
 
     const state = EditorState.create({
