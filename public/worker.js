@@ -96,6 +96,14 @@ self.onmessage = (e) => {
         return text.replace(/!/g, '.');
       };
 
+      const toSuperscript = (num) => {
+        const superscripts = {
+          '0': '⁰', '1': '¹', '2': '²', '3': '³', '4': '⁴', 
+          '5': '⁵', '6': '⁶', '7': '⁷', '8': '⁸', '9': '⁹'
+        };
+        return num.toString().split('').map(c => superscripts[c]).join('');
+      };
+
       segments.forEach((seg, i) => {
         const trimmedSeg = seg.trim();
         
@@ -116,9 +124,9 @@ self.onmessage = (e) => {
               translationText = leadingWhitespace + translatedString + trailingWhitespace;
 
               if (includeNotes && translationData.note) {
-                if (format === 'txt') noteText = ` [${noteCounter}]`;
+                if (format === 'txt') noteText = toSuperscript(noteCounter);
                 if (format === 'md') noteText = `[^${noteCounter}]`;
-                if (format === 'html') noteText = `&nbsp;<a href="#note-${noteCounter}" id="note-ref-${noteCounter}"><sup>${noteCounter}</sup></a>`;
+                if (format === 'html') noteText = `&nbsp;<a href="#footnote-${noteCounter}" id="footnote-ref-${noteCounter}"><sup>${noteCounter}</sup></a>`;
                 notes.push({ number: noteCounter, text: translationData.note });
                 noteCounter++;
               }
@@ -172,7 +180,7 @@ self.onmessage = (e) => {
         if (format === 'html' && translationData?.segmentType === 'Heading') {
           flushHtmlParagraphBuffer();
           const level = translationData.outlineLevel?.replace('Level ', '') || '2';
-          reconstructed += `<h${level}>${translationText}</h${level}>\n`;
+          reconstructed += `<h${level}>${translationText}${noteText}</h${level}>\n`;
           return; // Skip delimiter and normal processing for headings
         }
 
@@ -209,11 +217,11 @@ self.onmessage = (e) => {
 
       if (includeNotes && notes.length > 0) {
         if (format === 'txt') {
-          reconstructed += '\n\n---\n\nNotes\n\n' + notes.map(n => `${n.number}. ${n.text}`).join('\n');
+          reconstructed += '\n\n---\n\nSkribhigu\n\n' + notes.map(n => `${n.number}. ${n.text}`).join('\n');
         } else if (format === 'md') {
-          reconstructed += '\n\n---\n\n' + notes.map(n => `[^${n.number}]: ${n.text}`).join('\n');
+          reconstructed += '\n\n---\n\n\n\n' + notes.map(n => `[^${n.number}]: ${n.text}`).join('\n');
         } else if (format === 'html') {
-          reconstructed += `<hr><h2>Notes</h2><ol>${notes.map(n => `<li id="note-${n.number}">${n.text}</li>`).join('')}</ol>`;
+          reconstructed += `<hr><h2>Skribhigu</h2><div>${notes.map(n => `<div id="footnote-${n.number}"><a href="#footnote-ref-${n.number}">^</a> ${n.text}</div>`).join('')}</div>`;
         }
       }
 
