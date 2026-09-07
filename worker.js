@@ -79,6 +79,7 @@ self.onmessage = (e) => {
       const notes = [];
       let noteCounter = 1;
       let htmlParagraphBuffer = '';
+      let pendingNoteText = '';
 
       const flushHtmlParagraphBuffer = () => {
         if (htmlParagraphBuffer.trim()) {
@@ -126,7 +127,7 @@ self.onmessage = (e) => {
               if (includeNotes && translationData.note) {
                 if (format === 'txt') noteText = toSuperscript(noteCounter);
                 if (format === 'md') noteText = `[^${noteCounter}]`;
-                if (format === 'html') noteText = `&nbsp;<a href="#footnote-${noteCounter}" id="footnote-ref-${noteCounter}"><sup>${noteCounter}</sup></a>`;
+                if (format === 'html') noteText = `<a href="#footnote-${noteCounter}" id="footnote-ref-${noteCounter}"><sup>${noteCounter}</sup></a>`;
                 notes.push({ number: noteCounter, text: translationData.note });
                 noteCounter++;
               }
@@ -165,16 +166,22 @@ self.onmessage = (e) => {
           const prevIsBlockquote = prevTranslationData?.segmentType === 'Blockquote';
           const skipBecauseAlreadyInBlockquote = prevIsBlockquote && /[^\s]/.test(currentDelim);
 
+          let delimWithNote = pendingNoteText;
           if (!skipBecauseAlreadyInBlockquote) {
             const prevAction = prevTranslationData?.delimiterAction;
             if (prevAction !== 'Skip Succeeding' && prevAction !== 'Skip Both') {
                 const currentAction = translationData?.delimiterAction;
                 if (currentAction !== 'Skip Preceding' && currentAction !== 'Skip Both') {
-                    if (format === 'html') htmlParagraphBuffer += currentDelim;
-                    else reconstructed += currentDelim;
+                    const match = currentDelim.match(/^(\S*)([\s\S]*)$/);
+                    const punct = match ? match[1] : '';
+                    const space = match ? match[2] : '';
+                    delimWithNote = punct + pendingNoteText + space;
                 }
             }
           }
+          if (format === 'html') htmlParagraphBuffer += delimWithNote;
+          else reconstructed += delimWithNote;
+          pendingNoteText = '';
         }
 
         if (format === 'html' && translationData?.segmentType === 'Heading') {
@@ -208,10 +215,16 @@ self.onmessage = (e) => {
           const bqText = lines.map(line => '\t' + line).join('\n');
           reconstructed += bqText + '\n\n';
         } else {
-          if (format === 'html') htmlParagraphBuffer += translationText + noteText;
-          else reconstructed += translationText + noteText;
+          if (format === 'html') htmlParagraphBuffer += translationText;
+          else reconstructed += translationText;
+          pendingNoteText = noteText;
         }
       });
+
+      if (pendingNoteText) {
+        if (format === 'html') htmlParagraphBuffer += pendingNoteText;
+        else reconstructed += pendingNoteText;
+      }
 
       if (format === 'html') flushHtmlParagraphBuffer();
 
