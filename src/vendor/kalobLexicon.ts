@@ -6550,10 +6550,15 @@ export const commonSuffixes = [
     "name": "Worker",
     "desc": "worker; clerk; employed in (-er, -or, -ist)"
   },
+    {
+    "suffix": "orz",
+    "name": "Derivation",
+    "desc": "deriving or being drieved from (-ate, -ide, -ine, -ian, -ese)"
+  },
   {
     "suffix": "wng",
     "name": "Destination",
-    "desc": "destination, use (-ate, -ide, -ine, -ian, -ese)"
+    "desc": "destination, use (-able, -ible, -ware)"
   },
   {
     "suffix": "an",
