@@ -3192,7 +3192,7 @@ export const lexiconData = [
     "eng": "To speak / to say"
   },
   {
-    "word": "talg",
+    "word": "parl",
     "cat": "Noun/Number",
     "pos": "Noun",
     "eng": "To talk / to converse / to discuss / bidirectional exchange"
