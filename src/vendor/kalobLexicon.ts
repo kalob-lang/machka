@@ -6491,7 +6491,7 @@ export const commonSuffixes = [
     "desc": "beginning of action (en-, be-, -esce)"
   },
   {
-    "suffix": "iz",
+    "suffix": "irm",
     "name": "Commercial",
     "desc": "commercial, trading (-ery, -shop, -store)"
   },
@@ -6589,6 +6589,11 @@ export const commonSuffixes = [
     "suffix": "ing",
     "name": "Place",
     "desc": "place where people stay (-ary, -ery, -ory, -orium, -arium)"
+  },
+  {
+    "suffix": "in",
+    "name": "Containing",
+    "desc": "containing, full of (-ful, -ous)"
   },
   {
     "suffix": "od",
