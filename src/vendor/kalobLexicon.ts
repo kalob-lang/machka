@@ -1536,6 +1536,12 @@ export const lexiconData = [
     "eng": "In proportion to"
   },
   {
+    "word": "sro",
+    "cat": "Connective",
+    "pos": "Preposition",
+    "eng": "Compared to, in comparison with, relative to"
+  },
+  {
     "word": "sno",
     "cat": "Connective",
     "pos": "Preposition",
