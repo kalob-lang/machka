@@ -1524,9 +1524,9 @@ export const lexiconData = [
     "eng": "At the price of"
   },
   {
-    "word": "thri",
+    "word": "mw",
     "cat": "Connective",
-    "pos": "Preposition",
+    "pos": "Conjunction",
     "eng": "In proportion as / as"
   },
   {
@@ -1545,7 +1545,97 @@ export const lexiconData = [
     "word": "sno",
     "cat": "Connective",
     "pos": "Preposition",
-    "eng": "Far from / A great distance from"
+    "eng": "Far from (distance) / A great distance from"
+  },
+  {
+    "word": "sni",
+    "cat": "Connective",
+    "pos": "Preposition",
+    "eng": "Far from (resemblance), less than, quite the contrary"
+  },
+  {
+    "word": "kro",
+    "cat": "Connective",
+    "pos": "Preposition",
+    "eng": "Opposite, facing, across from, vis-à-vis"
+  },
+  {
+    "word": "phlo",
+    "cat": "Connective",
+    "pos": "Preposition",
+    "eng": "On the reverse/back of, on the opposite side of, on the flanks of"
+  },
+  {
+    "word": "thri",
+    "cat": "Connective",
+    "pos": "Preposition",
+    "eng": "By dint of, through repeated effort of"
+  },
+  {
+    "word": "tho",
+    "cat": "Connective",
+    "pos": "Preposition",
+    "eng": "Thanks to, by the intercession/aid of"
+  },
+  {
+    "word": "skro",
+    "cat": "Connective",
+    "pos": "Preposition",
+    "eng": "Unbeknownst to, in secret from, behind the back of"
+  },
+  {
+    "word": "klo",
+    "cat": "Connective",
+    "pos": "Preposition",
+    "eng": "Because of, on account of"
+  },
+  {
+    "word": "phli",
+    "cat": "Connective",
+    "pos": "Preposition",
+    "eng": "For lack of, in the absence of, failing"
+  },
+  {
+    "word": "tro",
+    "cat": "Connective",
+    "pos": "Preposition",
+    "eng": "By order of, in the name of, under the auspices of"
+  },
+  {
+    "word": "stri",
+    "cat": "Connective",
+    "pos": "Preposition",
+    "eng": "At the end/tip/extremity of"
+  },
+  {
+    "word": "shro",
+    "cat": "Connective",
+    "pos": "Preposition",
+    "eng": "Short of, to the debit of"
+  },
+  {
+    "word": "qi",
+    "cat": "Connective",
+    "pos": "Preposition",
+    "eng": "Athwart, diagonally across, at an angle to, at cross-purposes with"
+  },
+  {
+    "word": "stw",
+    "cat": "Connective",
+    "pos": "Conjunction",
+    "eng": "Just when, as soon as, on the point of"
+  },
+  {
+    "word": "wn",
+    "cat": "Connective",
+    "pos": "Conjunction",
+    "eng": "Unless"
+  },
+  {
+    "word": "phyw",
+    "cat": "Connective",
+    "pos": "Conjunction",
+    "eng": "Lest, for fear that, for fear of"
   },
   {
     "word": "plazh",
