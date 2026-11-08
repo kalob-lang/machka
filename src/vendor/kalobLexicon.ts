@@ -1638,6 +1638,12 @@ export const lexiconData = [
     "eng": "Lest, for fear that, for fear of"
   },
   {
+    "word": "khrv",
+    "cat": "Connective",
+    "pos": "Conjunction",
+    "eng": "while, whereas"
+  },
+  {
     "word": "plazh",
     "cat": "Modificative",
     "pos": "Adverb",
@@ -6144,7 +6150,7 @@ export const lexiconData = [
     "eng": "Attitude / posture / demeanor / expressive state / stance"
   },
   {
-    "word": "kyolz",
+    "word": "kyol",
     "cat": "Noun/Number",
     "pos": "Noun",
     "eng": "Cage / prison / inescapable enclosure / forced containment"
@@ -6216,10 +6222,100 @@ export const lexiconData = [
     "eng": "Wall / vertical structural boundary / physical barrier"
   },
   {
-    "word": "lyalz",
+    "word": "lyal",
     "cat": "Noun/Number",
     "pos": "Noun",
     "eng": "Loyal / faithful / absolute allegiance"
+  },
+  {
+    "word": "phirz",
+    "cat": "Noun/Number",
+    "pos": "Noun",
+    "eng": "Fierce / ferocious / brutal / savage / terrible"
+},
+  {
+    "word": "karbh",
+    "cat": "Noun/Number",
+    "pos": "Noun",
+    "eng": "Carbon / coal"
+},
+  {
+    "word": "syom",
+    "cat": "Noun/Number",
+    "pos": "Noun",
+    "eng": "Silicon / semiconductor"
+  },
+  {
+    "word": "sodh",
+    "cat": "Noun/Number",
+    "pos": "Noun",
+    "eng": "Sodium / volatile alkali base metal"
+  },
+  {
+    "word": "khorjh",
+    "cat": "Noun/Number",
+    "pos": "Noun",
+    "eng": "Magnesium / highly combustible white-burning meta"
+  },
+  {
+    "word": "tin",
+    "cat": "Noun/Number",
+    "pos": "Noun",
+    "eng": "Tin / elemental tin / low-melting base metal"
+  },
+  {
+    "word": "tozd",
+    "cat": "Noun/Number",
+    "pos": "Noun",
+    "eng": "Zinc / elemental zinc / anti-corrosive base metal"
+  },
+  {
+    "word": "stol",
+    "cat": "Noun/Number",
+    "pos": "Noun",
+    "eng": "Steel / hard metal / macro-category of forged metallic matter"
+  },
+  {
+    "word": "nyom",
+    "cat": "Noun/Number",
+    "pos": "Noun",
+    "eng": "Aluminum / lightweight non-corrosive metal"
+  },
+  {
+    "word": "kalz",
+    "cat": "Noun/Number",
+    "pos": "Noun",
+    "eng": "Calcium / biological and geological structural metal"
+  },
+  {
+    "word": "yang",
+    "cat": "Noun/Number",
+    "pos": "Noun",
+    "eng": "Oxygen / biological and combustive chemical catalyst"
+  },
+  {
+    "word": "ching",
+    "cat": "Noun/Number",
+    "pos": "Noun",
+    "eng": "Hydrogen / lightest gas / stellar fuel"
+  },
+  {
+    "word": "tan",
+    "cat": "Noun/Number",
+    "pos": "Noun",
+    "eng": "Nitrogen / inert atmospheric baseline gas"
+  },
+  {
+    "word": "kird",
+    "cat": "Noun/Number",
+    "pos": "Noun",
+    "eng": "Sulfur / flammable odorous non-metal"
+  },
+  {
+    "word": "rin",
+    "cat": "Noun/Number",
+    "pos": "Noun",
+    "eng": "Phosphorus / reactive light-emitting non-metal"
   },
   {
     "word": "w!",
