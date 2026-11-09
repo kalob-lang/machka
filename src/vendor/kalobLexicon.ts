@@ -1107,7 +1107,7 @@ export const lexiconData = [
     "word": "ib",
     "cat": "Connective",
     "pos": "Preposition",
-    "eng": "On, above"
+    "eng": "on, upon, above"
   },
   {
     "word": "ijh",
@@ -1251,7 +1251,7 @@ export const lexiconData = [
     "word": "ob",
     "cat": "Connective",
     "pos": "Preposition",
-    "eng": "Above, at the top"
+    "eng": "Up, at the top"
   },
   {
     "word": "oz",
