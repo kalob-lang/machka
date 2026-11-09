@@ -2805,13 +2805,13 @@ export const lexiconData = [
     "word": "khog",
     "cat": "Noun/Number",
     "pos": "Noun",
-    "eng": "High / tall"
+    "eng": "High / tall / elevated magnitude / scalar maximum"
   },
   {
     "word": "nizg",
     "cat": "Noun/Number",
     "pos": "Noun",
-    "eng": "Low / depressed (measurement)"
+    "eng": "Low / short (height) / depressed magnitude / scalar minimum"
   },
   {
     "word": "shin",
@@ -5493,31 +5493,31 @@ export const lexiconData = [
     "word": "mvd",
     "cat": "Noun/Number",
     "pos": "Noun",
-    "eng": "Middle / center / within"
+    "eng": "Middle / geometric center / structural core / midpoint"
   },
   {
     "word": "tab",
     "cat": "Noun/Number",
     "pos": "Noun",
-    "eng": "Top / above / on"
+    "eng": "Upper section / upward trajectory / superior (in rank) / relative vertical high"
   },
   {
     "word": "niz",
     "cat": "Noun/Number",
     "pos": "Noun",
-    "eng": "Under / below / down"
+    "eng": "Lower section / downward trajectory / inferior rank / relative vertical low"
   },
   {
     "word": "phrwnd",
     "cat": "Noun/Number",
     "pos": "Noun",
-    "eng": "Front / before"
+    "eng": "Leading edge / forward trajectory / structural front / precursor"
   },
   {
     "word": "pozd",
     "cat": "Noun/Number",
     "pos": "Noun",
-    "eng": "Back / behind / rear"
+    "eng": "Trailing edge / backward trajectory / structural rear / successor"
   },
   {
     "word": "tinz",
