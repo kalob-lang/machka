@@ -2883,7 +2883,7 @@ export const lexiconData = [
     "word": "sterg",
     "cat": "Noun/Number",
     "pos": "Noun",
-    "eng": "Strong / durable / high magnitude / intense"
+    "eng": "Powerful / intense / strong (physical) / high magnitude output"
   },
   {
     "word": "tang",
@@ -4551,7 +4551,7 @@ export const lexiconData = [
     "word": "strong",
     "cat": "Noun/Number",
     "pos": "Noun",
-    "eng": "Iron / strong / unyielding"
+    "eng": "Iron / strong (inflexible) / unyielding / rigid material"
   },
   {
     "word": "chin",
@@ -6655,7 +6655,7 @@ export const commonSuffixes = [
   {
     "suffix": "az",
     "name": "Relating to",
-    "desc": "moral relation (-al)"
+    "desc": "abstract relation (-al)"
   },
   {
     "suffix": "wmb",
@@ -6734,8 +6734,8 @@ export const commonSuffixes = [
   },
   {
     "suffix": "vdh",
-    "name": "Moral",
-    "desc": "moral characteristical generality (-ism, -ity)"
+    "name": "Abstract",
+    "desc": "abstract characteristical generality (-ism, -ity)"
   },
   {
     "suffix": "amb",
